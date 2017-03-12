@@ -2,34 +2,19 @@
 const panelFilepath = "src/panel.html";
 const iconFilepath = "images/icon128.png";
 
-let firstInit = true;
-
 // Create a new Devtools Panel
 chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel) => {
-  // code invoked on panel creation
+  // Panel created
+  let panel = null;
 
   thisPanel.onShown.addListener(panelWindow => {
-    const $ = panelWindow.jQuery;
-
-    console.log("user switched to this panel");
-    if (firstInit) {
-      firstInit = false;
-      
-      $("#loadLastInspected").click(() => {
-        getLastInspectedElement().then(result => {
-          console.log("Last inspected element", result);
-          $("#inspectedResult").text(result);
-        }).catch(() => {
-          console.log("Nothing inspected recently.");
-        });
-      });
+    // User switched to this panel
+    if (panel == null) {
+      panel = new PanelEnvironment(panelWindow);
     }
+    panel.onShown(panelWindow);
   });
 
-  function onElementSelectionChanged() {
-    console.log("selection changed");
-  }
-  chrome.devtools.panels.elements.onSelectionChanged.addListener(onElementSelectionChanged);
 });
 
 function getLastInspectedElement() {
@@ -44,3 +29,38 @@ function getLastInspectedElement() {
     });
   });
 }
+
+function PanelEnvironment(panelWindow) {
+  const $ = panelWindow.jQuery;
+  const $loadLastInspected = $("#loadLastInspected");
+  const $resultDisplay = $("#inspectedResult");
+
+  $loadLastInspected.click(showLastInspected);
+  // event onElementSelectionChanged
+  chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
+    showLastInspected();
+  });
+
+  /** Called everytime user switches to this panel */
+  function onPanelShown(win) {
+    if (win !== panelWindow) {
+      throw new Error("global window changed for panel environment")
+    }
+  }
+
+  function showLastInspected() {
+    getLastInspectedElement().then(result => {
+      console.log($(result));
+      $resultDisplay.html(result);
+    }).catch(e => {
+      console.log(e);
+      $resultDisplay.text("Nothing inspected recently.");
+    });
+  }
+
+  return {
+    onShown: onPanelShown
+  };
+}
+
+
