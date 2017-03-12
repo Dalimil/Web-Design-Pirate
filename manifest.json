@@ -3,11 +3,11 @@
   "name": "Web Design Pirate",
   "version": "1.0",
   "description": "Fast and easy way to copy web components, HTML widgets and parts of website design.",
-  "devtools_page": "devtools.html",
+  "devtools_page": "src/devtools.html",
   
   "icons": {
-    "128": "icon128.png",
-    "48": "icon48.png"
+    "128": "images/icon128.png",
+    "48": "images/icon48.png"
   },
   "offline_enabled": true,
   "author": "Dalimil Hajek"
