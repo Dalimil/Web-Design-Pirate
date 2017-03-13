@@ -26,11 +26,6 @@ function getStyleSheets() {
 }
 
 
-getStyleSheets().then(values => {
-	console.log(values); // [ { source: "a.css", cssText: "body ..." }, ...]
-});
-
-
 /**
  * Return simplified CSS (based on given HTML and CSS)
  * Use test API: https://github.com/giakki/uncss 
@@ -53,6 +48,48 @@ function uncss(inputHtml, inputCss) {
 			throw data.error;
 		}
 		return data.outputCss;
+	});
+}
+
+// We only need to get stylesheets once
+const stylesheets = getStyleSheets();
+
+/**
+ * Merge all stylesheets, remove unneeded CSS by calling uncss api,
+ * return simplified css string and stats about usage of individual sources
+ */
+function getCssForHtml(inputHtml) {
+	const separator = "/* ---sep--- */";
+	const blockCommentRegexp = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g;
+
+	return stylesheets.then(values => {
+		// values = [ { source: "a.css", cssText: "body ..." }, ...]
+
+		const allCss = values.map(x => x.cssText).join(separator);
+
+		return uncss(inputHtml, allCss).then(outputCss => {
+			const cssPieces = outputCss.split(separator);
+			if (cssPieces.length != values.length) {
+				throw new Error("API-returned CSS is not in expected format.");
+			}
+			return cssPieces.map((v, i) => ({
+				source: values[i].source,
+				cssText: v.replace(blockCommentRegexp, "").trim()
+			}));
+		}).then(cssPieces => {
+			const stats = cssPieces.map(({ source, cssText }) => ({
+				source,
+				usage: cssText.length
+			}));
+
+			const cssString = cssPieces.map(({ source, cssText }) =>
+				`/** ----- ${source} ----- */\n${cssText}`).join("\n");
+
+			return {
+				stats,
+				css: cssString
+			};
+		});
 	});
 }
 
