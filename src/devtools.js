@@ -18,13 +18,17 @@ chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel)
 });
 
 function getLastInspectedElement() {
+  const expr = `JSON.stringify({
+    element: $0.outerHTML,
+    source: document.documentElement.outerHTML
+  });`;
   // Use any CommandLine APIs inside eval() - e.g. $0 or inspect()
   return new Promise((resolve, reject) => {
-    chrome.devtools.inspectedWindow.eval("$0.outerHTML", (result, exception) => {
+    chrome.devtools.inspectedWindow.eval(expr, (result, exception) => {
       if (exception || !result) {
         reject(exception);
       } else {
-        resolve(result);
+        resolve(JSON.parse(result));
       }
     });
   });
@@ -51,7 +55,7 @@ function PanelEnvironment(panelWindow) {
   function showLastInspected() {
     getLastInspectedElement().then(result => {
       console.log($(result));
-      $resultDisplay.html(result);
+      $resultDisplay.html(result.element);
     }).catch(e => {
       console.log(e);
       $resultDisplay.text("Nothing inspected recently.");

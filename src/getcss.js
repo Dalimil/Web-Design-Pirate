@@ -23,6 +23,27 @@ function getStyleSheets() {
 	});
 }
 
+
 getStyleSheets().then(values => {
-	console.log(values); // [ "stylesA", "stylesB", ... ]
+	console.log(values); // [ { source: "a.css", cssText: "body ..." }, ...]
 });
+
+
+function uncss(inputHtml, inputCss) {
+	const testServerUrl = "https://uncss-online.com/uncss";
+	const formData = new FormData();
+	formData.append("inputHtml", inputHtml);
+	formData.append("inputCss", inputCss);
+	formData.append("type", "fetch");
+	return fetch(testServerUrl, {
+		method: "POST",
+		body: formData
+	}).then(data => data.json())
+	.then(data => {
+		if (data.error) {
+			throw data.error;
+		}
+		return data.outputCss;
+	});
+}
+

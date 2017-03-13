@@ -4,3 +4,6 @@
 
 ## TODO
 Add proper icons
+
+## Publish
+https://developer.chrome.com/webstore/get_started_simple
