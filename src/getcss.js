@@ -1,6 +1,8 @@
 
 
-
+/**
+ * Return CSS text of all stylesheets in the page
+ */
 function getStyleSheets() {
 	const styleSheets = [].slice.call(document.styleSheets);
 
@@ -29,6 +31,13 @@ getStyleSheets().then(values => {
 });
 
 
+/**
+ * Return simplified CSS (based on given HTML and CSS)
+ * Use test API: https://github.com/giakki/uncss 
+ *
+ * Alternative solution: Use https://github.com/reworkcss/css
+ * 	and document.querySelector() each of the CSS selectors to check if result is null
+ */
 function uncss(inputHtml, inputCss) {
 	const testServerUrl = "https://uncss-online.com/uncss";
 	const formData = new FormData();
