@@ -97,6 +97,12 @@ function PanelEnvironment(panelWindow) {
 const backgroundApi = (() => {
   let lastCachedStyleSheetsTabId = null;
   let lastCachedStyleSheetsResponse = null;
+  chrome.devtools.network.onNavigated.addListener(resetCache);
+  
+  function resetCache() {
+    lastCachedStyleSheetsTabId = null;
+    lastCachedStyleSheetsResponse = null;
+  }
 
   function requestStyleSheetsContent(tabId) {
     if (lastCachedStyleSheetsResponse !== null && tabId === lastCachedStyleSheetsTabId) {
