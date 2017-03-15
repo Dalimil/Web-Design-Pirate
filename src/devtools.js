@@ -20,14 +20,14 @@ chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel)
 });
 
 function PanelEnvironment(panelWindow) {
-  const $ = panelWindow.jQuery;
-  const $pirateElement = $("#pirateElement");
-  const $inspectedDisplay = $("#inspectedResult");
-  const $resultCssDisplay = $("#cssResult");
+  const doc = panelWindow.document;
+  const $pirateElement = doc.querySelector("#pirateElement");
+  const $inspectedDisplay = doc.querySelector("#inspectedResult");
+  const $resultCssDisplay = doc.querySelector("#cssResult");
   let lastInspectedElementHtml = null;
 
-  $pirateElement.prop('disabled', true);
-  $pirateElement.click(() => {
+  $pirateElement.disabled = true;
+  $pirateElement.addEventListener('click', () => {
     if (lastInspectedElementHtml && typeof lastInspectedElementHtml === "string") {
       pirateElement(lastInspectedElementHtml);
     }
@@ -51,12 +51,12 @@ function PanelEnvironment(panelWindow) {
       console.log(result);
       if (lastInspectedElementHtml == null) {
         // first time it can be used
-        $pirateElement.prop('disabled', false);
+        $pirateElement.disabled = false;
       }
       lastInspectedElementHtml = result.element;
-      $inspectedDisplay.html(result.element);
+      $inspectedDisplay.innerHTML = result.element;
     }).catch(e => {
-      $inspectedDisplay.text("Nothing inspected recently.");
+      $inspectedDisplay.innerHTML = "Nothing inspected recently.";
     });
   }
 
@@ -67,8 +67,8 @@ function PanelEnvironment(panelWindow) {
       return;
     }
     lastProcessFinished = false;
-    $pirateElement.prop('disabled', true);
-    $resultCssDisplay.text("");
+    $pirateElement.disabled = true;
+    $resultCssDisplay.innerHTML = "";
     backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
     .then(styleSheets => {
       console.log("STYLESHEETS", styleSheets);
@@ -76,13 +76,13 @@ function PanelEnvironment(panelWindow) {
     })
     .then(simplifiedCss => {
       console.log("done", simplifiedCss);
-      $resultCssDisplay.text(JSON.stringify(simplifiedCss.stats, null, 2) +'\n\n' + simplifiedCss.css);
-      $pirateElement.prop('disabled', false);
+      $resultCssDisplay.innerHTML = (JSON.stringify(simplifiedCss.stats, null, 2) +'\n\n' + simplifiedCss.css);
+      $pirateElement.disabled = false;
       lastProcessFinished = true;
     })
     .catch(e => {
       console.error("Error when pirating ", e);
-      $resultCssDisplay.text("Error occurred.");
+      $resultCssDisplay.innerHTML = "Error occurred.";
     });
   }
 
@@ -98,7 +98,7 @@ const backgroundApi = (() => {
   let lastCachedStyleSheetsTabId = null;
   let lastCachedStyleSheetsResponse = null;
   chrome.devtools.network.onNavigated.addListener(resetCache);
-  
+
   function resetCache() {
     lastCachedStyleSheetsTabId = null;
     lastCachedStyleSheetsResponse = null;
