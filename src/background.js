@@ -1,22 +1,14 @@
-// Background page
-chrome.runtime.onConnect.addListener(function(devToolsConnection) {
-    // assign the listener function to a variable so we can remove it later
-    const devToolsListener = function(message, sender, sendResponse) {
-        if (message.requestType == "stylesheets") {
-          fetchStyleSheetContent(message.styleSheets).then(sendResponse);
-        } else if (message.requestType == "uncss") {
-          getCssForHtml(message.inputHtml, message.styleSheets).then(sendResponse);
-        } else {
-          sendResponse("invalid");
-        }
-        return true; // keep open until sendResponse is called (async)
-    };
-    // add the listener
-    devToolsConnection.onMessage.addListener(devToolsListener);
+// Background extension page - Event page (only runs based on event listeners)
 
-    devToolsConnection.onDisconnect.addListener(function() {
-         devToolsConnection.onMessage.removeListener(devToolsListener);
-    });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.requestType == "stylesheets") {
+		fetchStyleSheetContent(message.styleSheets).then(sendResponse);
+	} else if (message.requestType == "uncss") {
+		getCssForHtml(message.inputHtml, message.styleSheets).then(sendResponse);
+	} else {
+		sendResponse("invalid");
+	}
+	return true; // keep open until sendResponse is called (async)
 });
 
 /** Fetching CSS stylesheets from anywhere
@@ -47,37 +39,35 @@ function fetchStyleSheetContent(styleSheets) {
  * return simplified css string and stats about usage of individual sources
  */
 function getCssForHtml(inputHtml, styleSheets) {
+	// styleSheets = [ { source: "a.css", cssText: "body ..." }, ...]
 	const separator = "/* ---sep--- */";
 	const blockCommentRegexp = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g;
+	const allCss = styleSheets.map(x => x.cssText).join(separator);
 
-	return styleSheets.then(values => {
-		// values = [ { source: "a.css", cssText: "body ..." }, ...]
-
-		const allCss = values.map(x => x.cssText).join(separator);
-
-		return _uncss(inputHtml, allCss).then(outputCss => {
-			const cssPieces = outputCss.split(separator);
-			if (cssPieces.length != values.length) {
-				throw new Error("API-returned CSS is not in expected format.");
-			}
-			return cssPieces.map((v, i) => ({
-				source: values[i].source,
-				cssText: v.replace(blockCommentRegexp, "").trim()
-			}));
-		}).then(cssPieces => {
-			const stats = cssPieces.map(({ source, cssText }) => ({
-				source,
-				usage: cssText.length
-			}));
-
-			const cssString = cssPieces.map(({ source, cssText }) =>
-				`/** ----- ${source} ----- */\n${cssText}`).join("\n");
-
+	return _uncss(inputHtml, allCss).then(outputCss => {
+		const cssTextPieces = outputCss.split(separator);
+		if (cssTextPieces.length != styleSheets.length) {
+			throw new Error("API-returned CSS is not in expected format.");
+		}
+		const cssPieces = cssTextPieces.map((v, i) => {
 			return {
-				stats,
-				css: cssString
+				source: styleSheets[i].source,
+				cssText: v.replace(blockCommentRegexp, "").trim()
 			};
-		});
+		}).filter(sheet => sheet.cssText.length != 0);
+
+		const stats = cssPieces.map(({ source, cssText }) => ({
+			source,
+			usage: cssText.length
+		}));
+
+		const cssString = cssPieces.map(({ source, cssText }) =>
+			`/** ----- ${source} ----- */\n\n${cssText}`).join("\n\n");
+
+		return {
+			stats,
+			css: cssString
+		};
 	});
 }
 
@@ -102,7 +92,7 @@ function _uncss(inputHtml, inputCss) {
 		if (data.error) {
 			throw data.error;
 		}
-		return data.outputCss;
+		return data.outputCss.replace(/\\r\\n/g, "\n");
 	});
 }
 

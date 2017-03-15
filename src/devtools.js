@@ -22,7 +22,8 @@ chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel)
 function PanelEnvironment(panelWindow) {
   const $ = panelWindow.jQuery;
   const $pirateElement = $("#pirateElement");
-  const $resultDisplay = $("#inspectedResult");
+  const $inspectedDisplay = $("#inspectedResult");
+  const $resultCssDisplay = $("#cssResult");
   let lastInspectedElementHtml = null;
 
   $pirateElement.prop('disabled', true);
@@ -53,10 +54,9 @@ function PanelEnvironment(panelWindow) {
         $pirateElement.prop('disabled', false);
       }
       lastInspectedElementHtml = result.element;
-      $resultDisplay.html(result.element);
+      $inspectedDisplay.html(result.element);
     }).catch(e => {
-      console.log(e);
-      $resultDisplay.text("Nothing inspected recently.");
+      $inspectedDisplay.text("Nothing inspected recently.");
     });
   }
 
@@ -68,11 +68,21 @@ function PanelEnvironment(panelWindow) {
     }
     lastProcessFinished = false;
     $pirateElement.prop('disabled', true);
-    bgPageConnection.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
-    .then(styleSheets => bgPageConnection.requestUncss(inputHtml, styleSheets))
+    $resultCssDisplay.text("");
+    backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
+    .then(styleSheets => {
+      console.log("STYLESHEETS", styleSheets);
+      return backgroundApi.requestUncss(inputHtml, styleSheets);
+    })
     .then(simplifiedCss => {
-      console.log("done");
+      console.log("done", simplifiedCss);
+      $resultCssDisplay.text(JSON.stringify(simplifiedCss.stats, null, 2) +'\n\n' + simplifiedCss.css);
       $pirateElement.prop('disabled', false);
+      lastProcessFinished = true;
+    })
+    .catch(e => {
+      console.error("Error when pirating ", e);
+      $resultCssDisplay.text("Error occurred.");
     });
   }
 
@@ -84,25 +94,16 @@ function PanelEnvironment(panelWindow) {
 /**
  * Wrapper for communication with the background.js page
  */
-const bgPageConnection = (() => {
-  // Create a connection to the background page
-  const backgroundPageConnection = chrome.runtime.connect({
-      name: "devtools-page"
-  });
-
+const backgroundApi = (() => {
   let lastCachedStyleSheetsTabId = null;
   let lastCachedStyleSheetsResponse = null;
 
-  backgroundPageConnection.onMessage.addListener((message) => {
-      // Handle responses from the background page, if any
-      console.log("got response back: ", message);
-  });
-
   function requestStyleSheetsContent(tabId) {
     if (lastCachedStyleSheetsResponse !== null && tabId === lastCachedStyleSheetsTabId) {
-      return lastCachedStyleSheetsResponse;
+      return Promise.resolve(lastCachedStyleSheetsResponse);
     }
-    contentScripts.getStyleSheets().then(styleSheets => {
+    // First pull hrefs from content DOM and then 'fetch' in background.js
+    return contentScripts.getStyleSheets().then(styleSheets => {
       return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
           requestType: "stylesheets",
@@ -110,7 +111,6 @@ const bgPageConnection = (() => {
         }, function(response) {
           lastCachedStyleSheetsTabId = tabId;
           lastCachedStyleSheetsResponse = response;
-          console.log(response);
           resolve(response);
         });
       });
@@ -124,7 +124,6 @@ const bgPageConnection = (() => {
         inputHtml,
         styleSheets
       }, function(response) {
-        console.log(response);
         resolve(response);
       });
     });

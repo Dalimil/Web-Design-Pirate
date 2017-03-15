@@ -6,7 +6,7 @@
   "devtools_page": "src/devtools.html",
   "background": {
     "persistent": false,
-    "scripts": ["background.js"]
+    "scripts": ["src/background.js"]
   },
   "permissions": [
     "http://*/",
