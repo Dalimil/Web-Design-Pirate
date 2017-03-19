@@ -2,9 +2,13 @@
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.requestType == "stylesheets") {
-		fetchStyleSheetContent(message.styleSheets).then(sendResponse);
+		fetchStyleSheetContent(message.styleSheets)
+			.then(sendResponse)
+			.catch(e => sendResponse(e.toString()));
 	} else if (message.requestType == "uncss") {
-		getCssForHtml(message.inputHtml, message.styleSheets).then(sendResponse);
+		getCssForHtml(message.inputHtml, message.styleSheets)
+			.then(sendResponse)
+			.catch(e => sendResponse(e.toString()));
 	} else {
 		sendResponse("invalid");
 	}
@@ -40,14 +44,15 @@ function fetchStyleSheetContent(styleSheets) {
  */
 function getCssForHtml(inputHtml, styleSheets) {
 	// styleSheets = [ { source: "a.css", cssText: "body ..." }, ...]
-	const separator = "/* ---sep--- */";
+	const separator = "/*****-----sep-----*****/";
 	const blockCommentRegexp = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//g;
-	const allCss = styleSheets.map(x => x.cssText).join(separator);
+	const allCss = styleSheets.map(x => x.cssText).join(`\n\n${separator}\n\n`);
 
 	return _uncss(inputHtml, allCss).then(outputCss => {
 		const cssTextPieces = outputCss.split(separator);
 		if (cssTextPieces.length != styleSheets.length) {
-			throw new Error("API-returned CSS is not in expected format.");
+			throw new Error(`API-returned CSS is not in expected format.
+				${cssTextPieces.length} - ${styleSheets.length} - ${outputCss} - ${allCss}`);
 		}
 		const cssPieces = cssTextPieces.map((v, i) => {
 			return {
