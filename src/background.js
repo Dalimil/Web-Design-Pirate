@@ -51,7 +51,7 @@ function getCssForHtml(inputHtml, styleSheets) {
 		}
 		const cssPieces = cssTextPieces.map((v, i) => {
 			return {
-				source: styleSheets[i].source,
+				source: styleSheets[i].source || "internal",
 				cssText: v.replace(blockCommentRegexp, "").trim()
 			};
 		}).filter(sheet => sheet.cssText.length != 0);
@@ -61,8 +61,10 @@ function getCssForHtml(inputHtml, styleSheets) {
 			usage: cssText.length
 		}));
 
+		const hrString = Array(70).join("-");
 		const cssString = cssPieces.map(({ source, cssText }) =>
-			`/** ----- ${source} ----- */\n\n${cssText}`).join("\n\n");
+			`/* ${hrString} */\n/* ${source} */\n/* ${hrString} */\n\n${cssText}`
+		).join("\n\n");
 
 		return {
 			stats,

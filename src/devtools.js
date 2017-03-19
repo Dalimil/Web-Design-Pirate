@@ -24,6 +24,7 @@ function PanelEnvironment(panelWindow) {
   const $pirateElement = doc.querySelector("#pirateElement");
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $resultCssDisplay = doc.querySelector("#cssResult");
+  const $resultStatsDisplay = doc.querySelector("#statsResult");
   let lastInspectedElementHtml = null;
 
   $pirateElement.disabled = true;
@@ -54,9 +55,9 @@ function PanelEnvironment(panelWindow) {
         $pirateElement.disabled = false;
       }
       lastInspectedElementHtml = result.element;
-      $inspectedDisplay.innerHTML = result.element;
+      $inspectedDisplay.textContent = result.element;
     }).catch(e => {
-      $inspectedDisplay.innerHTML = "Nothing inspected recently.";
+      $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
   }
 
@@ -68,21 +69,25 @@ function PanelEnvironment(panelWindow) {
     }
     lastProcessFinished = false;
     $pirateElement.disabled = true;
-    $resultCssDisplay.innerHTML = "";
+    $resultCssDisplay.textContent = "";
+    $resultStatsDisplay.textContent = "";
+    console.log("Pirate starts");
     backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
     .then(styleSheets => {
-      console.log("STYLESHEETS", styleSheets);
+      console.log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
       return backgroundApi.requestUncss(inputHtml, styleSheets);
     })
     .then(simplifiedCss => {
       console.log("done", simplifiedCss);
-      $resultCssDisplay.innerHTML = (JSON.stringify(simplifiedCss.stats, null, 2) +'\n\n' + simplifiedCss.css);
+      $resultCssDisplay.textContent = simplifiedCss.css;
+      $resultStatsDisplay.textContent = JSON.stringify(simplifiedCss.stats, null, 2);
       $pirateElement.disabled = false;
       lastProcessFinished = true;
     })
     .catch(e => {
       console.error("Error when pirating ", e);
-      $resultCssDisplay.innerHTML = "Error occurred.";
+      $resultCssDisplay.textContent = "Error occurred.";
+      $resultStatsDisplay.textContent = "";
     });
   }
 
@@ -110,6 +115,7 @@ const backgroundApi = (() => {
     }
     // First pull hrefs from content DOM and then 'fetch' in background.js
     return contentScripts.getStyleSheets().then(styleSheets => {
+      console.log("Raw stylesheets", styleSheets);
       return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
           requestType: "stylesheets",

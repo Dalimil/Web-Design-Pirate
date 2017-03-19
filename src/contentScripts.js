@@ -10,10 +10,10 @@ const contentScripts = (() => {
   function getStyleSheets() {
     return [].slice.call(document.styleSheets).map(({ cssRules: cr, href }) => (
       {
-        href: href || "internal",
-        cssText: cr && cr.length && [].slice.call(cr).map(r => r.cssText).join(" \n"),
+        href,
+        cssText: (cr && cr.length) ? [].slice.call(cr).map(r => r.cssText).join(" \n") : null,
       }
-    ));
+    )).filter(v => v.href || v.cssText);
   }
 
   /**
