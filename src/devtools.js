@@ -4,6 +4,8 @@
 const panelFilepath = "src/panel.html";
 const iconFilepath = "images/icon128.png";
 
+const Log = (...args) => console.log.apply(console, args);
+
 // Create a new Devtools Panel
 chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel) => {
   // Panel created
@@ -49,7 +51,7 @@ function PanelEnvironment(panelWindow) {
 
   function showLastInspected() {
     contentScripts.getLastInspectedElement().then(result => {
-      console.log(result);
+      Log(result);
       if (lastInspectedElementHtml == null) {
         // first time it can be used
         $pirateElement.disabled = false;
@@ -64,21 +66,21 @@ function PanelEnvironment(panelWindow) {
   let lastProcessFinished = true;
   function pirateElement(inputHtml) {
     if (!lastProcessFinished) {
-      console.log("Not yet finished");
+      Log("Not yet finished");
       return;
     }
     lastProcessFinished = false;
     $pirateElement.disabled = true;
     $resultCssDisplay.textContent = "";
     $resultStatsDisplay.textContent = "";
-    console.log("Pirate starts");
+    Log("Pirate starts");
     backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
     .then(styleSheets => {
-      console.log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
+      Log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
       return backgroundApi.requestUncss(inputHtml, styleSheets);
     })
     .then(simplifiedCss => {
-      console.log("done", simplifiedCss);
+      Log("done", simplifiedCss);
       $resultCssDisplay.textContent = simplifiedCss.css;
       $resultStatsDisplay.textContent = JSON.stringify(simplifiedCss.stats, null, 2);
       $pirateElement.disabled = false;
@@ -115,7 +117,7 @@ const backgroundApi = (() => {
     }
     // First pull hrefs from content DOM and then 'fetch' in background.js
     return contentScripts.getStyleSheets().then(styleSheets => {
-      console.log("Raw stylesheets", styleSheets);
+      Log("Raw stylesheets", styleSheets);
       return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
           requestType: "stylesheets",
