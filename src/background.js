@@ -52,7 +52,7 @@ function getCssForHtml(inputHtml, styleSheets) {
 		const cssTextPieces = outputCss.split(separator);
 		if (cssTextPieces.length != styleSheets.length) {
 			throw new Error(`API-returned CSS is not in expected format.
-				${cssTextPieces.length} - ${styleSheets.length} - ${outputCss} - ${allCss}`);
+				${cssTextPieces.length} - ${styleSheets.length}`);
 		}
 		const cssPieces = cssTextPieces.map((v, i) => {
 			return {

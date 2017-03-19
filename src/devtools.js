@@ -80,6 +80,9 @@ function PanelEnvironment(panelWindow) {
       return backgroundApi.requestUncss(inputHtml, styleSheets);
     })
     .then(simplifiedCss => {
+      if (!simplifiedCss.css || !simplifiedCss.stats) {
+        throw new Error(simplifiedCss);
+      }
       Log("done", simplifiedCss);
       $resultCssDisplay.textContent = simplifiedCss.css;
       $resultStatsDisplay.textContent = JSON.stringify(simplifiedCss.stats, null, 2);
