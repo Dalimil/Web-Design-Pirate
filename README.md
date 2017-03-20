@@ -1,6 +1,7 @@
 # Web Design Pirate
 
-**Chrome DevTools Extension - Fast and easy way to copy web components, HTML widgets and parts of website design.**
+**Chrome DevTools Extension** :boat: :ghost: :anchor:  
+Fast and easy way to copy web components, HTML widgets and parts of website design. 
 
 <a href="https://github.com/Dalimil/Web-Design-Pirate">
   <img alt="babel" src="https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/icon450.png" width="300">
