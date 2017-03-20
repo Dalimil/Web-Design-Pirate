@@ -1,4 +1,5 @@
 // global variables: 
+// cssbeautify(styleString)
 // contentScripts.getStyleSheets
 // contentScripts.getLastInspectedElement
 const panelFilepath = "src/panel.html";
@@ -80,14 +81,19 @@ function PanelEnvironment(panelWindow) {
       Log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
       return backgroundApi.requestUncss(inputHtml, styleSheets);
     })
-    .then(simplifiedCss => {
-      if (!simplifiedCss.css || !simplifiedCss.stats) {
-        throw new Error(simplifiedCss);
+    .then(cssData => {
+      if (!cssData.css || !cssData.stats) {
+        throw new Error(cssData);
       }
-      Log("done", simplifiedCss);
-      $resultCssDisplay.textContent = simplifiedCss.css;
-      $resultStatsDisplay.textContent = JSON.stringify(simplifiedCss.stats, null, 2);
-      $resultPreview.srcdoc = `<style>${simplifiedCss.css}</style>${inputHtml}`;
+      Log("done", cssData);
+      return {
+        css: cssbeautify(cssData.css),
+        stats: cssData.stats 
+      };
+    }).then(cssData => {
+      $resultCssDisplay.textContent = cssData.css;
+      $resultStatsDisplay.textContent = JSON.stringify(cssData.stats, null, 2);
+      $resultPreview.srcdoc = `<style>${cssData.css}</style>${inputHtml}`;
       $pirateElement.disabled = false;
       lastProcessFinished = true;
     })

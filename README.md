@@ -18,6 +18,7 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 ## TODO
 Remove elements with display none
 Convert relative url to absolute
+We need to consider the whole selector path -> e.g. "#header .nav .nav-item"
 Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender
 Slider to remove inner levels of HTML - show how many CSS lines it produces + rerender result + cache uncss calls
 
