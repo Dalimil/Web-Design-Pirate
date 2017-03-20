@@ -2,6 +2,10 @@
 
 **Chrome DevTools Extension - Fast and easy way to copy web components, HTML widgets and parts of website design.**
 
+<a href="https://github.com/Dalimil/Web-Design-Pirate">
+  <img alt="babel" src="https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/icon450.png" width="300">
+</a>
+
 ## Motivation & Description
 It is hard to look at a website and copy only a small part of it (widget/component/element). One could copy the full HTML and all CSS files and then try to filter out things we don't need, but that would take too much time.
 
@@ -11,7 +15,6 @@ It is hard to look at a website and copy only a small part of it (widget/compone
 For instance I like Facebook's *Create a Post* widget. I select it using Chrome Developer Tools Inspector, switch to my Web Design Pirate tab, and copy the result.
 
 ## TODO
-Add proper icons
 Remove elements with display none
 Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender
 Slider to remove inner levels of HTML - show how many CSS lines it produces + rerender result + cache uncss calls
