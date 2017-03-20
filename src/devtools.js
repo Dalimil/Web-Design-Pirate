@@ -27,6 +27,7 @@ function PanelEnvironment(panelWindow) {
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $resultCssDisplay = doc.querySelector("#cssResult");
   const $resultStatsDisplay = doc.querySelector("#statsResult");
+  const $resultPreview = doc.querySelector("#previewResult");
   let lastInspectedElementHtml = null;
 
   $pirateElement.disabled = true;
@@ -86,6 +87,7 @@ function PanelEnvironment(panelWindow) {
       Log("done", simplifiedCss);
       $resultCssDisplay.textContent = simplifiedCss.css;
       $resultStatsDisplay.textContent = JSON.stringify(simplifiedCss.stats, null, 2);
+      $resultPreview.srcdoc = `<style>${simplifiedCss.css}</style>${inputHtml}`;
       $pirateElement.disabled = false;
       lastProcessFinished = true;
     })
