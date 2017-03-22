@@ -33,8 +33,8 @@ function PanelEnvironment(panelWindow) {
 
   $pirateElement.disabled = true;
   $pirateElement.addEventListener('click', () => {
-    if (lastInspectedElementHtml && typeof lastInspectedElementHtml === "string") {
-      pirateElement(lastInspectedElementHtml);
+    if (lastInspectedElementHtml && typeof lastInspectedElementHtml.element === "string") {
+      pirateElement(lastInspectedElementHtml.element);
     }
   });
   // update on first panel show
@@ -58,8 +58,13 @@ function PanelEnvironment(panelWindow) {
         // first time it can be used
         $pirateElement.disabled = false;
       }
-      lastInspectedElementHtml = result.element;
+      lastInspectedElementHtml = result;
       $inspectedDisplay.textContent = result.element;
+      /*const helperDiv = document.createElement("div");
+      helperDiv.textContent = result.element;
+      $inspectedDisplay.innerHTML = $inspectedDisplay.innerHTML.replace(helperDiv.innerHTML,
+        `<span class="highlight">${helperDiv.innerHTML}</span>`);
+      */
     }).catch(e => {
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });

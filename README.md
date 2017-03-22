@@ -18,7 +18,7 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 ## TODO
 - Remove elements with display none
 - Convert relative url to absolute
-- We need to consider the whole selector path -> e.g. "#header .nav .nav-item"
+- We need to consider the whole selector path -> e.g. "#header .nav .nav-item" -- add 'include parent nodes' switch?
 - Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender
 - Slider to remove inner levels of HTML - show how many CSS lines it produces + rerender result + cache uncss calls
 - Publish: https://developer.chrome.com/webstore/get_started_simple

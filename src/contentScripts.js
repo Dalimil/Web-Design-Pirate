@@ -21,9 +21,22 @@ const contentScripts = (() => {
    * Exception when $0 is null is captured by windowEval Promise reject
    */
   function getLastInspectedElement() {
+    if ($0 == null) {
+      throw new Error("Nothing inspected yet.");
+    }
+    let u = $0;
+    let fullHtml = $0.outerHTML;
+    while (u.nodeName.toLowerCase() != "body") {
+      u = u.parentNode;
+      if (u == null) {
+        throw new Error("Invalid element selected.");
+      }
+      fullHtml = u.outerHTML.replace(u.innerHTML, fullHtml);
+    }
+    
     return {
       element: $0.outerHTML,
-      source: document.documentElement.outerHTML
+      fullHtml
     };
   }
 
