@@ -17,7 +17,7 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 
 ## TODO
 - Convert relative url to absolute
-- Add HTML beautify
+- It's painfully slow (devtools freeze) for large chunks of HTML (e.g. expedia html body) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
 - Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender
 - Slider to remove inner levels of HTML - show how many CSS lines it produces + rerender result + cache uncss calls
 - maybe perform repeated uncss requests with reduced css (from previous calls) and only first call with all stylesheets

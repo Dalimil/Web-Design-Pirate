@@ -1,9 +1,9 @@
 // global variables: 
-// cssbeautify(styleString)
 // backgroundApi.getCssString
 // backgroundApi.getLastInspectedElement
 // contentScripts.getStyleSheets
 // contentScripts.getLastInspectedElement
+// html_beautify, css_beautify
 const panelFilepath = "src/panel.html";
 const iconFilepath = "images/icon128.png";
 
@@ -39,10 +39,10 @@ const DataStore = new (function(){
   function combineCssPieces(cssPieces) {
     const hrString = Array(70).join("-");
     const cssString = cssPieces.map(({ source, cssText }) =>
-      `/* ${hrString} */\n/* ${source} */\n/* ${hrString} */\n\n${cssText}`
+      `/* ${hrString}\n * ${source} \n * ${hrString} \n */\n\n${cssText}`
     ).join("\n\n");
 
-    return cssbeautify(cssString);
+    return css_beautify(cssString);
   }
 
   this._updateInputHtml = () => {
@@ -60,6 +60,17 @@ const DataStore = new (function(){
     return contentScripts.getLastInspectedElement().then(result => {
       Log(result);
       this.lastInspectedData = result;
+      
+      const { fullHtml, element } = result;
+      Log("Html lengths: ", fullHtml.length, element.length);
+      const options = {
+        indent_size: 2,
+        wrap_line_length: 0, // disable (max char per line)
+        preserve_newlines: false
+      };
+      this.lastInspectedData.fullHtml = html_beautify(fullHtml, options);
+      this.lastInspectedData.element = html_beautify(element, options);
+
       this._updateInputHtml();
     });
   };
@@ -92,7 +103,7 @@ const DataStore = new (function(){
  */
 function PanelEnvironment(panelWindow) {
   const doc = panelWindow.document;
-  const Prism = panelWindow.Prism;
+  const Prism = panelWindow.Prism; // syntax color highlighting
   const $pirateElement = doc.querySelector("#pirateElement");
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $resultCssDisplay = doc.querySelector("#cssResult");
@@ -109,15 +120,16 @@ function PanelEnvironment(panelWindow) {
   $includeParentsSwitch.addEventListener('change', () => {
     DataStore.setIncludeParents($includeParentsSwitch.checked);
     if (DataStore.inputHtml) {
-      $inspectedDisplay.textContent = DataStore.inputHtml;
+      setInspectedDisplayContent(DataStore.inputHtml);
     }
   });
 
   // update on first panel show
   updateLastInspected();
+  let updateQueued = false;
   // event onElementSelectionChanged
   chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-    updateLastInspected();
+    updateQueued = true;
   });
 
   /** Called everytime user switches to this panel */
@@ -125,13 +137,22 @@ function PanelEnvironment(panelWindow) {
     if (win !== panelWindow) {
       throw new Error("global window changed for panel environment")
     }
+    if (updateQueued) {
+      updateQueued = false;
+      updateLastInspected();
+    }
+  }
+
+  function setInspectedDisplayContent(htmlString) {
+    $inspectedDisplay.innerHTML = Prism.highlight(htmlString, Prism.languages.html);
+    //$inspectedDisplay.textContent = htmlString;
   }
 
   function updateLastInspected() {
+    $inspectedDisplay.textContent = "";
     DataStore.pullLastInspectedData().then(() => {
       $pirateElement.disabled = false;
-      var res = Prism.highlight(DataStore.inputHtml, Prism.languages.html);
-      $inspectedDisplay.innerHTML = res;
+      setInspectedDisplayContent(DataStore.inputHtml);
     }).catch(e => {
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
