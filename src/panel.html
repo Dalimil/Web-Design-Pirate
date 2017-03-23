@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
   <head>
+    <link rel="stylesheet" href="lib/prism.css">
     <style>
       html, body{
         margin: 0;
@@ -42,7 +43,7 @@
         background: #eee;
         box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
       }
-      #inspectedResult {
+      #inspectedResultWrapper {
         height: 40%;
         width: 100%;
       }
@@ -59,6 +60,8 @@
         height: 40%;
       }
     </style>
+    <script src="lib/prism.js"></script>
+    <script src="lib/jquery-3.2.0.min.js"></script>
   </head>
   <body>
     <div class="main">
@@ -68,7 +71,9 @@
           <input type="checkbox" id="include-parents-switch" />Include parent nodes
           <span>"todo:HelpIcon+tooltip"<span>
         </div>
-        <textarea id="inspectedResult" class="code-block" placeholder="Last inspected element." disabled></textarea>
+        <pre id="inspectedResultWrapper" class="code-block">
+          <code id="inspectedResult" class="language-markup">Last inspected element.</code>
+        </pre>
         <iframe id="previewResult" srcdoc=""></iframe>
       </div>
       <div class="pane pane-right">

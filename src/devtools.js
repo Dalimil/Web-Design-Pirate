@@ -92,6 +92,7 @@ const DataStore = new (function(){
  */
 function PanelEnvironment(panelWindow) {
   const doc = panelWindow.document;
+  const Prism = panelWindow.Prism;
   const $pirateElement = doc.querySelector("#pirateElement");
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $resultCssDisplay = doc.querySelector("#cssResult");
@@ -129,7 +130,8 @@ function PanelEnvironment(panelWindow) {
   function updateLastInspected() {
     DataStore.pullLastInspectedData().then(() => {
       $pirateElement.disabled = false;
-      $inspectedDisplay.textContent = DataStore.inputHtml;
+      var res = Prism.highlight(DataStore.inputHtml, Prism.languages.html);
+      $inspectedDisplay.innerHTML = res;
     }).catch(e => {
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
