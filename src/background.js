@@ -1,4 +1,5 @@
 // Background extension page - Event page (only runs based on event listeners)
+// Console log messages won't show
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.requestType == "stylesheets") {
@@ -61,19 +62,8 @@ function getCssForHtml(inputHtml, styleSheets) {
 			};
 		}).filter(sheet => sheet.cssText.length != 0);
 
-		const stats = cssPieces.map(({ source, cssText }) => ({
-			source,
-			usage: cssText.length
-		}));
-
-		const hrString = Array(70).join("-");
-		const cssString = cssPieces.map(({ source, cssText }) =>
-			`/* ${hrString} */\n/* ${source} */\n/* ${hrString} */\n\n${cssText}`
-		).join("\n\n");
-
 		return {
-			stats,
-			css: cssString
+			cssPieces
 		};
 	});
 }

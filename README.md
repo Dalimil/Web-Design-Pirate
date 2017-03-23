@@ -16,11 +16,11 @@ It is hard to look at a website and copy only a small part of it (widget/compone
 For instance I like Facebook's *Create a Post* widget. I select it using Chrome Developer Tools Inspector, switch to my Web Design Pirate tab, and copy the result.
 
 ## TODO
-- Remove elements with display none
 - Convert relative url to absolute
-- We need to consider the whole selector path -> e.g. "#header .nav .nav-item" -- add 'include parent nodes' switch?
+- Add HTML beautify
 - Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender
 - Slider to remove inner levels of HTML - show how many CSS lines it produces + rerender result + cache uncss calls
+- maybe perform repeated uncss requests with reduced css (from previous calls) and only first call with all stylesheets
 - Publish: https://developer.chrome.com/webstore/get_started_simple
 
 ## Screenshots

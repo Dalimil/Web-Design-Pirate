@@ -65,9 +65,10 @@
       <div class="pane pane-left">
         <div class="action-menu">
           <button id="pirateElement">Pirate (todo:remove + run onchange)</button>
-          "todo:HelpIcon+tooltip"
+          <input type="checkbox" id="include-parents-switch" />Include parent nodes
+          <span>"todo:HelpIcon+tooltip"<span>
         </div>
-        <textarea id="inspectedResult" class="code-block" placeholder="Last inspected element."></textarea>
+        <textarea id="inspectedResult" class="code-block" placeholder="Last inspected element." disabled></textarea>
         <iframe id="previewResult" srcdoc=""></iframe>
       </div>
       <div class="pane pane-right">
