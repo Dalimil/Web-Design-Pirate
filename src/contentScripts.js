@@ -37,8 +37,7 @@ const contentScripts = (() => {
     return {
       element: $0.outerHTML,
       fullHtml,
-      origin: window.location.origin, // hostname with protocol
-      pathname: window.location.pathname // e.g. /cs/index.html
+      href: window.location.href
     };
   }
 

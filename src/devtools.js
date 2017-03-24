@@ -4,6 +4,7 @@
 // contentScripts.getStyleSheets
 // contentScripts.getLastInspectedElement
 // html_beautify, css_beautify
+// jQuery, $
 const panelFilepath = "src/panel.html";
 const iconFilepath = "images/icon128.png";
 
@@ -45,6 +46,14 @@ const DataStore = new (function(){
     return css_beautify(cssString);
   }
 
+  function replaceRelativePaths(htmlString, baseUrl) {
+    const $html = jQuery(htmlString);
+    $html.find('img').each((ind, el) => {
+      el.src = new URL(el.src, baseUrl);
+    });
+    return $html.html();
+  }
+
   this._updateInputHtml = () => {
     if (this.lastInspectedData === null) {
       return;
@@ -61,7 +70,7 @@ const DataStore = new (function(){
       Log(result);
       this.lastInspectedData = result;
       
-      const { fullHtml, element } = result;
+      const { fullHtml, element, href } = result;
       Log("Html lengths: ", fullHtml.length, element.length);
       const options = {
         indent_size: 2,
@@ -70,7 +79,7 @@ const DataStore = new (function(){
       };
       this.lastInspectedData.fullHtml = html_beautify(fullHtml, options);
       this.lastInspectedData.element = html_beautify(element, options);
-
+      Log(this.lastInspectedData);
       this._updateInputHtml();
     });
   };
