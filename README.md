@@ -26,3 +26,4 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 
 ## Screenshots
 ![Web Design Pirate - Work in Progress](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-wip.png)
+![Web Design Pirate - Work in Progress 2](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-wip2.png)
