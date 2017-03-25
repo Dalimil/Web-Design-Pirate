@@ -16,7 +16,6 @@ It is hard to look at a website and copy only a small part of it (widget/compone
 For instance I like Facebook's *Create a Post* widget. I select it using Chrome Developer Tools Inspector, switch to my Web Design Pirate tab, and copy the result.
 
 ## TODO
-- Convert relative url to absolute
 - It's painfully slow (devtools freeze) for large chunks of HTML (e.g. expedia html body) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
 - Add option to add CSS prefixes e.g. _abc123 in front of all to isolate component and allow complete copy paste - check how react does it
 - Do they want to copy any of the stylesheets? E.g. bootstrap --- Allow show/hide all CSS from that source + rerender

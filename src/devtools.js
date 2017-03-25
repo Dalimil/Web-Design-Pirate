@@ -47,11 +47,27 @@ const DataStore = new (function(){
   }
 
   function replaceRelativePaths(htmlString, baseUrl) {
-    const $html = jQuery(htmlString);
+    const $html = jQuery(`<div>${htmlString}</div>`);
     $html.find('img').each((ind, el) => {
-      el.src = new URL(el.src, baseUrl);
+      const original = el.outerHTML;
+      el.src = new URL($(el.outerHTML).attr('src'), baseUrl).href;
+      htmlString = htmlString.replace(original, el.outerHTML);
     });
-    return $html.html();
+    return htmlString;
+  }
+
+  function normalizeRawHtml(rawHtmlString, baseUrl) {
+    Log("Raw html length: ", rawHtmlString.length);
+    const options = {
+      indent_size: 2,
+      wrap_line_length: 0, // disable (max char per line)
+      preserve_newlines: false
+    };
+    const beautified = html_beautify(rawHtmlString, options);
+    if (!baseUrl || typeof baseUrl != "string") {
+      return beautified;
+    }
+    return replaceRelativePaths(beautified, baseUrl);
   }
 
   this._updateInputHtml = () => {
@@ -67,19 +83,10 @@ const DataStore = new (function(){
 
   this.pullLastInspectedData = function() {
     return contentScripts.getLastInspectedElement().then(result => {
-      Log(result);
       this.lastInspectedData = result;
-      
-      const { fullHtml, element, href } = result;
-      Log("Html lengths: ", fullHtml.length, element.length);
-      const options = {
-        indent_size: 2,
-        wrap_line_length: 0, // disable (max char per line)
-        preserve_newlines: false
-      };
-      this.lastInspectedData.fullHtml = html_beautify(fullHtml, options);
-      this.lastInspectedData.element = html_beautify(element, options);
-      Log(this.lastInspectedData);
+      this.lastInspectedData.element = normalizeRawHtml(result.element, result.href);
+      this.lastInspectedData.fullHtml = normalizeRawHtml(result.fullHtml, result.href);
+      Log(result.href, result, this.lastInspectedData);
       this._updateInputHtml();
     });
   };
