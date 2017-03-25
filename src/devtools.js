@@ -68,6 +68,7 @@ const DataStore = new (function(){
   this.inputHtml = null; // maybe change to a function to allow editable textarea
   this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
   this.cssPieces = null;
+  this.originalSheetLengths = {}; // { sourceA.css => 54321 chars }
   this.getCssString = () => Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
   this._includeParents = false;
 
@@ -101,6 +102,12 @@ const DataStore = new (function(){
     return backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
       .then(styleSheets => {
         Log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
+        this.originalSheetLengths = {};
+        styleSheets.forEach(sheet => {
+          if (sheet.source) {
+            this.originalSheetLengths[sheet.source] = sheet.cssText.length;
+          }
+        });
         return backgroundApi.requestUncss(this.inputHtml, styleSheets);
       })
       .then(cssData => {
@@ -218,8 +225,10 @@ function PanelEnvironment(panelWindow) {
       });
 
       const descr = document.createElement("span");
-      descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> (${piece.cssText.length} chars)</span>` +
-        `<br><span>${piece.source}</span>`;
+      let percUsed = DataStore.originalSheetLengths[piece.source];
+      percUsed = percUsed ? ` ~ ${Math.min(100, 100 * piece.cssText.length / percUsed).toFixed()}%` : "";
+      descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> ` +
+        `(${piece.cssText.length} chars used${percUsed})</span><br><span>${piece.source}</span>`;
       const wrapperDiv = document.createElement("div");
       wrapperDiv.className = "source-item";
       wrapperDiv.appendChild(input);
