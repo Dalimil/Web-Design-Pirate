@@ -62,6 +62,12 @@ function getCssForHtml(inputHtml, styleSheets) {
 			};
 		}).filter(sheet => sheet.cssText.length != 0);
 
+		cssPieces.forEach(piece => {
+			const source = piece.source;
+			const pathname = new URL(source, "https://example.com/").pathname;
+			piece.filename = pathname.substring(pathname.lastIndexOf('/') + 1);
+		});
+
 		return {
 			cssPieces
 		};

@@ -35,6 +35,7 @@
         color: #222;
         white-space: pre-wrap;
         overflow-wrap: break-word;
+        overflow: auto;
         padding: 5px;
         margin-bottom: 1em;
         resize: none;
@@ -42,6 +43,12 @@
         border-radius: 2px;
         background: #eee;
         box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      }
+      .source-item {
+        margin-bottom: 1em;
+      }
+      .source-item-title {
+        font-size: 1.2em;
       }
       #inspectedResultWrapper {
         height: 40%;
@@ -77,7 +84,7 @@
       <div class="pane pane-right">
         <pre id="cssResultWrapper" class="code-block"><code id="cssResult" class="language-css">CSS result will display here</code>
         </pre>
-        <textarea id="statsResult" class="code-block" placeholder="Statistics will display here" disabled></textarea>
+        <div id="statsResult" class="code-block">Statistics will display here</div>
       </div>
     </div>
   </body>

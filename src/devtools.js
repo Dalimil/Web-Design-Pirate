@@ -68,8 +68,7 @@ const DataStore = new (function(){
   this.inputHtml = null; // maybe change to a function to allow editable textarea
   this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
   this.cssPieces = null;
-  this.getCssString = () => Utils.combineCssPieces(this.cssPieces);
-  this.getCssStats = () => this.cssPieces.map(x => ({ source: x.source, usage: x.cssText.length }));
+  this.getCssString = () => Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
   this._includeParents = false;
 
   this._updateInputHtml = () => {
@@ -110,6 +109,7 @@ const DataStore = new (function(){
         }
         Log("done", cssData);
         this.cssPieces = cssData.cssPieces;
+        this.cssPieces.forEach(piece => piece.selected = true);
       });
   };
 })();
@@ -189,10 +189,8 @@ function PanelEnvironment(panelWindow) {
     $resultPreview.srcdoc = "";
     Log("Pirate starts");
     DataStore.pullUncssResult().then(() => {
-      const cssString = DataStore.getCssString();
-      $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
-      $resultStatsDisplay.textContent = JSON.stringify(DataStore.getCssStats(), null, 2);
-      $resultPreview.srcdoc = `<style>${cssString}</style>${DataStore.inputHtml}`;
+      createCssSelection(DataStore.cssPieces);
+      updateResultPreview();
       $pirateElement.disabled = false;
       lastProcessFinished = true;
     })
@@ -200,6 +198,37 @@ function PanelEnvironment(panelWindow) {
       console.error("Error when pirating ", e);
       $resultCssDisplay.textContent = "Error occurred.";
     });
+  }
+
+  function updateResultPreview() {
+    const cssString = DataStore.getCssString();
+    $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
+    $resultPreview.srcdoc = `<style>${cssString}</style>${DataStore.inputHtml}`;
+  }
+
+  function createCssSelection(cssPieces) {
+    const boxList = document.createElement("div");
+    cssPieces.forEach(piece => {
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = true;
+      input.addEventListener("change", () => {
+        piece.selected = input.checked;
+        updateResultPreview();
+      });
+
+      const descr = document.createElement("span");
+      descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> (${piece.cssText.length} chars)</span>` +
+        `<br><span>${piece.source}</span>`;
+      const wrapperDiv = document.createElement("div");
+      wrapperDiv.className = "source-item";
+      wrapperDiv.appendChild(input);
+      wrapperDiv.appendChild(descr);
+
+      boxList.appendChild(wrapperDiv);
+    });
+    $resultStatsDisplay.innerHTML = "";
+    $resultStatsDisplay.appendChild(boxList);
   }
 
   return {
