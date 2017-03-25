@@ -25,28 +25,17 @@ chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel)
 
 });
 
-/**
- * Single DataStore instance that handles all data
- */
-const DataStore = new (function(){
-  this.lastInspectedData = null;
-  this.inputHtml = null; // maybe change to a function to allow editable textarea
-  this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
-  this.cssPieces = null;
-  this.getCssString = () => combineCssPieces(this.cssPieces);
-  this.getCssStats = () => this.cssPieces.map(x => ({ source: x.source, usage: x.cssText.length }));
-  this._includeParents = false;
-  
-  function combineCssPieces(cssPieces) {
+const Utils = {
+  combineCssPieces(cssPieces) {
     const hrString = Array(70).join("-");
     const cssString = cssPieces.map(({ source, cssText }) =>
       `/* ${hrString}\n * ${source} \n * ${hrString} \n */\n\n${cssText}`
     ).join("\n\n");
 
     return css_beautify(cssString);
-  }
+  },
 
-  function replaceRelativePaths(htmlString, baseUrl) {
+  replaceRelativePaths(htmlString, baseUrl) {
     const $html = jQuery(`<div>${htmlString}</div>`);
     $html.find('img').each((ind, el) => {
       const original = el.outerHTML;
@@ -54,9 +43,9 @@ const DataStore = new (function(){
       htmlString = htmlString.replace(original, el.outerHTML);
     });
     return htmlString;
-  }
+  },
 
-  function normalizeRawHtml(rawHtmlString, baseUrl) {
+  normalizeRawHtml(rawHtmlString, baseUrl) {
     Log("Raw html length: ", rawHtmlString.length);
     const options = {
       indent_size: 2,
@@ -67,8 +56,21 @@ const DataStore = new (function(){
     if (!baseUrl || typeof baseUrl != "string") {
       return beautified;
     }
-    return replaceRelativePaths(beautified, baseUrl);
+    return Utils.replaceRelativePaths(beautified, baseUrl);
   }
+};
+
+/**
+ * Single DataStore instance that handles all data
+ */
+const DataStore = new (function(){
+  this.lastInspectedData = null;
+  this.inputHtml = null; // maybe change to a function to allow editable textarea
+  this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
+  this.cssPieces = null;
+  this.getCssString = () => Utils.combineCssPieces(this.cssPieces);
+  this.getCssStats = () => this.cssPieces.map(x => ({ source: x.source, usage: x.cssText.length }));
+  this._includeParents = false;
 
   this._updateInputHtml = () => {
     if (this.lastInspectedData === null) {
@@ -84,8 +86,8 @@ const DataStore = new (function(){
   this.pullLastInspectedData = function() {
     return contentScripts.getLastInspectedElement().then(result => {
       this.lastInspectedData = result;
-      this.lastInspectedData.element = normalizeRawHtml(result.element, result.href);
-      this.lastInspectedData.fullHtml = normalizeRawHtml(result.fullHtml, result.href);
+      this.lastInspectedData.element = Utils.normalizeRawHtml(result.element, result.href);
+      this.lastInspectedData.fullHtml = Utils.normalizeRawHtml(result.fullHtml, result.href);
       Log(result.href, result, this.lastInspectedData);
       this._updateInputHtml();
     });
