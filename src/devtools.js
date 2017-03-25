@@ -188,7 +188,7 @@ function PanelEnvironment(panelWindow) {
     Log("Pirate starts");
     DataStore.pullUncssResult().then(() => {
       const cssString = DataStore.getCssString();
-      $resultCssDisplay.textContent = cssString;
+      $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
       $resultStatsDisplay.textContent = JSON.stringify(DataStore.getCssStats(), null, 2);
       $resultPreview.srcdoc = `<style>${cssString}</style>${DataStore.inputHtml}`;
       $pirateElement.disabled = false;

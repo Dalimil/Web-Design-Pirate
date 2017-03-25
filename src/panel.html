@@ -47,7 +47,7 @@
         height: 40%;
         width: 100%;
       }
-      #cssResult {
+      #cssResultWrapper {
         height: 60%;
         width: 100%;
       }
@@ -75,7 +75,8 @@
         <iframe id="previewResult" srcdoc=""></iframe>
       </div>
       <div class="pane pane-right">
-        <textarea id="cssResult" class="code-block" placeholder="CSS result will display here" disabled></textarea>
+        <pre id="cssResultWrapper" class="code-block"><code id="cssResult" class="language-css">CSS result will display here</code>
+        </pre>
         <textarea id="statsResult" class="code-block" placeholder="Statistics will display here" disabled></textarea>
       </div>
     </div>
