@@ -4,6 +4,7 @@
 // contentScripts.getStyleSheets
 // contentScripts.getLastInspectedElement
 // html_beautify, css_beautify
+// cssParser
 // jQuery, $
 const panelFilepath = "src/panel.html";
 const iconFilepath = "images/icon128.png";
@@ -57,6 +58,28 @@ const Utils = {
       return beautified;
     }
     return Utils.replaceRelativePaths(beautified, baseUrl);
+  },
+
+  randomString(len) {
+    // max len ~ 20
+    return (Math.random() + 1).toString(36).substr(2, len);
+  },
+
+  addCssModuleScopeClass(cssString) {
+    try {
+      const classModulePrefix = `__${Utils.randomString(6)}`;
+      const cssAst = cssParser.parse(cssString, { silent: false });
+      cssAst.stylesheet.rules.forEach(rule => {
+        if (rule.selectors) {
+          rule.selectors = rule.selectors.map(s => `${classModulePrefix} ${s}`);
+        }
+      });
+      Log(cssAst);
+      const result = cssParser.stringify(cssAst);
+      return result;
+    } catch (e) {
+      return null;
+    }
   }
 };
 
@@ -69,10 +92,21 @@ const DataStore = new (function(){
   this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
   this.cssPieces = null;
   this.originalSheetLengths = {}; // { sourceA.css => 54321 chars }
-  this.getCssString = () => Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
   this._includeParents = false;
+  this._scopeCssModule = false;
 
-  this._updateInputHtml = () => {
+  this.getCssString = function(disallowScoped) {
+    if (this.cssPieces === null) {
+      return "";
+    }
+    const basicCssString = Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
+    if (this._scopeCssModule && !disallowScoped) {
+      return Utils.addCssModuleScopeClass(basicCssString) || basicCssString;
+    }
+    return basicCssString;
+  };
+
+  this._updateInputHtml = function() {
     if (this.lastInspectedData === null) {
       return;
     }
@@ -96,6 +130,10 @@ const DataStore = new (function(){
   this.setIncludeParents = function(include) {
     this._includeParents = include;
     this._updateInputHtml();
+  };
+
+  this.setScopeCssModule = function(setScope) {
+    this._scopeCssModule = setScope;
   };
 
   this.pullUncssResult = function() {
@@ -135,6 +173,7 @@ function PanelEnvironment(panelWindow) {
   const $resultStatsDisplay = doc.querySelector("#statsResult");
   const $resultPreview = doc.querySelector("#previewResult");
   const $includeParentsSwitch = doc.querySelector("#include-parents-switch");
+  const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
 
   $pirateElement.disabled = true;
   $pirateElement.addEventListener('click', () => {
@@ -146,6 +185,12 @@ function PanelEnvironment(panelWindow) {
     DataStore.setIncludeParents($includeParentsSwitch.checked);
     if (DataStore.inputHtml) {
       setInspectedDisplayContent(DataStore.inputHtml);
+    }
+  });
+  $scopeCssSwitch.addEventListener('change', () => {
+    DataStore.setScopeCssModule($scopeCssSwitch.checked);
+    if (DataStore.cssPieces) {
+      updateResultPreview();
     }
   });
 
@@ -210,7 +255,7 @@ function PanelEnvironment(panelWindow) {
   function updateResultPreview() {
     const cssString = DataStore.getCssString();
     $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
-    $resultPreview.srcdoc = `<style>${cssString}</style>${DataStore.inputHtml}`;
+    $resultPreview.srcdoc = `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}`;
   }
 
   function createCssSelection(cssPieces) {
