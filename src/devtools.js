@@ -75,13 +75,36 @@ const Utils = {
         }
       });
       Log(cssAst);
-      const result = cssParser.stringify(cssAst);
-      return result;
-    } catch (e) {
-      return null;
+      return cssParser.stringify(cssAst);
+    } catch(e) {
+      // Parse error, return original string
+      return cssString;
+    }
+  },
+
+  replaceCssRelativeUrls(cssString, baseUrl) {
+    try {
+      const cssAst = cssParser.parse(cssString, { silent: false });
+      cssAst.stylesheet.rules.forEach(rule => {
+        if (rule.declarations) {
+          rule.declarations.forEach(declaration => {
+            const match = declaration.value && declaration.value.match(/url\("?([^")]+)"?\)/);
+            if (match && match[1]) {
+              const fullHref = new URL(match[1], baseUrl).href;
+              declaration.value = declaration.value.replace(match[0], `url(${fullHref})`);
+              Log("New CSS url replacement:", declaration.value);
+            }
+          });
+        }
+      });
+      return cssParser.stringify(cssAst);
+    } catch(e) {
+      // Parse error, return original string
+      return cssString;
     }
   }
 };
+
 
 /**
  * Single DataStore instance that handles all data
@@ -101,7 +124,7 @@ const DataStore = new (function(){
     }
     const basicCssString = Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
     if (this._scopeCssModule && !disallowScoped) {
-      return Utils.addCssModuleScopeClass(basicCssString) || basicCssString;
+      return Utils.addCssModuleScopeClass(basicCssString);
     }
     return basicCssString;
   };
@@ -154,7 +177,11 @@ const DataStore = new (function(){
         }
         Log("done", cssData);
         this.cssPieces = cssData.cssPieces;
-        this.cssPieces.forEach(piece => piece.selected = true);
+        this.cssPieces.forEach(piece => {
+          piece.selected = true;
+          const sheetUrl = piece.source == "internal" ? this.lastInspectedData.href : piece.source;
+          piece.cssText = Utils.replaceCssRelativeUrls(piece.cssText, sheetUrl);
+        });
       });
   };
 })();
