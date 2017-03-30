@@ -9,8 +9,7 @@
     "scripts": ["src/background.js"]
   },
   "permissions": [
-    "http://*/",
-    "https://*/" 
+    "<all_urls>"
   ],
   "icons": {
     "128": "images/icon128.png",

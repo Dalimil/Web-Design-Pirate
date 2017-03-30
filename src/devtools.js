@@ -201,6 +201,7 @@ function PanelEnvironment(panelWindow) {
   const $resultPreview = doc.querySelector("#previewResult");
   const $includeParentsSwitch = doc.querySelector("#include-parents-switch");
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
+  const $openResultWindow = doc.querySelector("#open-window-result");
 
   $pirateElement.disabled = true;
   $pirateElement.addEventListener('click', () => {
@@ -219,6 +220,10 @@ function PanelEnvironment(panelWindow) {
     if (DataStore.cssPieces) {
       updateResultPreview();
     }
+  });
+  $openResultWindow.disabled = true;
+  $openResultWindow.addEventListener('click', () => {
+    backgroundApi.requestResultWindow(getResultSrcDoc());
   });
 
   // update on first panel show
@@ -263,6 +268,7 @@ function PanelEnvironment(panelWindow) {
     }
     lastProcessFinished = false;
     $pirateElement.disabled = true;
+    $openResultWindow.disabled = true;
     $resultCssDisplay.textContent = "";
     $resultStatsDisplay.textContent = "";
     $resultPreview.srcdoc = "";
@@ -271,6 +277,7 @@ function PanelEnvironment(panelWindow) {
       createCssSelection(DataStore.cssPieces);
       updateResultPreview();
       $pirateElement.disabled = false;
+      $openResultWindow.disabled = false;
       lastProcessFinished = true;
     })
     .catch(e => {
@@ -282,7 +289,11 @@ function PanelEnvironment(panelWindow) {
   function updateResultPreview() {
     const cssString = DataStore.getCssString();
     $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
-    $resultPreview.srcdoc = `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}`;
+    $resultPreview.srcdoc = getResultSrcDoc();
+  }
+
+  function getResultSrcDoc() {
+    return `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}`;
   }
 
   function createCssSelection(cssPieces) {

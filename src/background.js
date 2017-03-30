@@ -1,5 +1,5 @@
 // Background extension page - Event page (only runs based on event listeners)
-// Console log messages won't show
+// Console log messages won't be shown (only shown in special console)
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.requestType == "stylesheets") {
@@ -10,11 +10,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		getCssForHtml(message.inputHtml, message.styleSheets)
 			.then(sendResponse)
 			.catch(e => sendResponse(e.toString()));
+	} else if (message.requestType == "result-window") {
+		getResultWindow(message.windowId)
+			.then(({ win, isNew }) => {
+				const notifyResultPopup = () => {
+					chrome.tabs.sendMessage(win.tabs[0].id, {
+						requestType: "result-html-update",
+						htmlString: message.htmlString
+					}, () => sendResponse(win.id)); // exit onResponse
+				};
+				if (isNew) {
+					// JS msg-receiving code is not ready immediately (fix)
+					setTimeout(notifyResultPopup, 1000);
+				} else {
+					notifyResultPopup();
+				}
+			})
+			.catch(e => sendResponse(e.toString()));
 	} else {
 		sendResponse("invalid");
 	}
 	return true; // keep open until sendResponse is called (async)
 });
+
+
+/**
+ * Get a reference to a popup window where we render result
+ * 	Creates a new popup window if no previous exists
+ */
+function getResultWindow(windowId) {
+	const createNewWindow = () => new Promise(resolve => {
+		const popupUrl = "src/result-popup/popup.html";
+		chrome.windows.create({ url: popupUrl, type: 'popup' }, newWin => {
+			resolve({ win: newWin, isNew: true });
+		});
+	});
+	if (typeof windowId !== "number") {
+		return createNewWindow();
+	}
+	return new Promise((resolve, reject) => {
+		chrome.windows.get(windowId, { populate: true }, (myWindow) => {
+			if (myWindow) {
+				resolve({ win: myWindow, isNew: false });
+			} else {
+				createNewWindow().then(resolve);
+			}
+		});
+	});
+}
 
 /** Fetching CSS stylesheets from anywhere
  *  -> CORS issue so it has to be done in background.js

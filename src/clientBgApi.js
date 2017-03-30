@@ -6,6 +6,7 @@
 const backgroundApi = (() => {
   let lastCachedStyleSheetsTabId = null;
   let lastCachedStyleSheetsResponse = null;
+  let lastResultWindowId = null;
   chrome.devtools.network.onNavigated.addListener(resetCache);
 
   function resetCache() {
@@ -45,9 +46,23 @@ const backgroundApi = (() => {
     });
   }
 
+  function requestResultWindow(htmlString) {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({
+        requestType: "result-window",
+        htmlString,
+        windowId: lastResultWindowId
+      }, function(response) {
+        lastResultWindowId = response;
+        resolve(response);
+      });
+    });
+  }
+
   return {
     requestStyleSheetsContent,
-    requestUncss
+    requestUncss,
+    requestResultWindow
   };
 })();
 

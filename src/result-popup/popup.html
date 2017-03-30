@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Web Design Pirate - Result Preview</title>
+  <style>
+    html, body{
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    html {
+      box-sizing: border-box;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    #result {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="result" srcdoc=""></iframe>
+  <script src="resultHandler.js"></script>
+</body>
+</html>
