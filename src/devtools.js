@@ -343,7 +343,9 @@ function PanelEnvironment(panelWindow) {
   }
 
   function getResultSrcDoc() {
-    return `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}`;
+    const injectedScriptFilename = "/src/result-popup/iframeInjected.js";
+    return `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}
+      <script src="${injectedScriptFilename}"></script>`;
   }
 
   function createCssSelection(cssPieces) {
