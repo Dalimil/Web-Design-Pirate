@@ -37,7 +37,7 @@ const Utils = {
   },
 
   replaceRelativePaths(htmlString, baseUrl) {
-    const $html = jQuery(`<div>${htmlString}</div>`);
+    const $html = Utils.transformHtmlToJQuery(htmlString);
     $html.find('img').each((ind, el) => {
       const original = el.outerHTML;
       el.src = new URL($(el.outerHTML).attr('src'), baseUrl).href;
@@ -92,7 +92,7 @@ const Utils = {
             if (match && match[1]) {
               const fullHref = new URL(match[1], baseUrl).href;
               declaration.value = declaration.value.replace(match[0], `url(${fullHref})`);
-              Log("New CSS url replacement:", declaration.value);
+              // Log("New CSS url replacement:", declaration.value);
             }
           });
         }
@@ -102,6 +102,57 @@ const Utils = {
       // Parse error, return original string
       return cssString;
     }
+  },
+
+  fakeBodyTag: "bodytag",
+  transformHtmlToJQuery(htmlString) {
+    if (htmlString.startsWith("<body")) {
+      htmlString = htmlString.replace("<body", `<${Utils.fakeBodyTag}`)
+        .replace("</body", `</${Utils.fakeBodyTag}`);
+    }
+    return jQuery(htmlString);
+  },
+  transformJQueryToHtml($html) {
+    let htmlString = $html.get(0).outerHTML;
+    if (htmlString.startsWith(`<${Utils.fakeBodyTag}`)) {
+      htmlString = htmlString.replace(`<${Utils.fakeBodyTag}`, "<body")
+        .replace(`</${Utils.fakeBodyTag}`, "</body");
+    }
+    return htmlString;
+  },
+
+  getHtmlTreeDepth(htmlString) {
+    let $html = Utils.transformHtmlToJQuery(htmlString);
+    let depth = 0;
+    while ($html.length > 0) {
+      depth += 1;
+      $html = $html.children().first();
+    }
+    return depth;
+  },
+
+  /**
+   * If we imagine the html to be a tree with certain depth H,
+   * then f(s, 0, H) returns original s,
+   * then f(s, 0, H-1) returns original with node leaves removed
+   * then f(s, 1, H) returns .innerHTML() with only the first html child
+   */
+  getHtmlBetweenTreeLevels(htmlString, levelStart, levelEnd) {
+    let $html = Utils.transformHtmlToJQuery(htmlString);
+    for (let i = 0; i < levelStart; i++) {
+      $html = $html.children().first(); // safe even for an empty selection
+    }
+    const removeDeeperThan = ($el, maxDepth) => {
+      if (maxDepth <= 0) {
+        return $el.empty();
+      }
+      removeDeeperThan.children.each((ind, el) => {
+        removeDeeperThan(jQuery(el), maxDepth-1);
+      });
+    };
+    removeDeeperThan($html, levelEnd - levelStart);
+    
+    return Utils.transformJQueryToHtml($html);
   }
 };
 
@@ -110,7 +161,7 @@ const Utils = {
  * Single DataStore instance that handles all data
  */
 const DataStore = new (function(){
-  this.lastInspectedData = null;
+  this.lastInspectedData = null; // { element, fullHtml, href }
   this.inputHtml = null; // maybe change to a function to allow editable textarea
   this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
   this.cssPieces = null;
@@ -206,13 +257,13 @@ function PanelEnvironment(panelWindow) {
   $pirateElement.disabled = true;
   $pirateElement.addEventListener('click', () => {
     if (DataStore.canPirate()) {
-      pirateElement(DataStore.inputHtml);
+      pirateElement();
     }
   });
   $includeParentsSwitch.addEventListener('change', () => {
     DataStore.setIncludeParents($includeParentsSwitch.checked);
     if (DataStore.inputHtml) {
-      setInspectedDisplayContent(DataStore.inputHtml);
+      updateInspectedDisplayContent();
     }
   });
   $scopeCssSwitch.addEventListener('change', () => {
@@ -245,23 +296,22 @@ function PanelEnvironment(panelWindow) {
     }
   }
 
-  function setInspectedDisplayContent(htmlString) {
-    $inspectedDisplay.innerHTML = Prism.highlight(htmlString, Prism.languages.html);
-    //$inspectedDisplay.textContent = htmlString;
+  function updateInspectedDisplayContent() {
+    $inspectedDisplay.innerHTML = Prism.highlight(DataStore.inputHtml, Prism.languages.html);
   }
 
   function updateLastInspected() {
     $inspectedDisplay.textContent = "";
     DataStore.pullLastInspectedData().then(() => {
       $pirateElement.disabled = false;
-      setInspectedDisplayContent(DataStore.inputHtml);
+      updateInspectedDisplayContent();
     }).catch(e => {
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
   }
 
   let lastProcessFinished = true;
-  function pirateElement(inputHtml) {
+  function pirateElement() {
     if (!lastProcessFinished) {
       Log("Not yet finished");
       return;
