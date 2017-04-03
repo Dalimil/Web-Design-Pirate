@@ -27,13 +27,23 @@ chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel)
 });
 
 const Utils = {
-  combineCssPieces(cssPieces) {
-    const hrString = Array(70).join("-");
+  combineCssPieces(cssPieces, minifyCss) {
+    const hrString = Array(minifyCss ? 10 : 70).join("-");
     const cssString = cssPieces.map(({ source, cssText }) =>
       `/* ${hrString}\n * ${source} \n * ${hrString} \n */\n\n${cssText}`
     ).join("\n\n");
 
-    return css_beautify(cssString);
+    if (minifyCss) {
+      const invSplitter = "_A_A_";
+      const beautified = css_beautify(cssString, { indent_size: 1, indent_char: " " }) + "\n";
+      return beautified
+        .replace(/\n}\r?\n/g, invSplitter) // mark lines of future interest
+        .replace(/\r?\n/g, "") // remove all newlines
+        .replace(new RegExp(invSplitter, 'g'), "}\n") // put lines of interest back
+        .replace(/\*\//g, "*/\n"); // fix block comments ending
+    } else {
+      return css_beautify(cssString);
+    }
   },
 
   replaceRelativePaths(htmlString, baseUrl) {
@@ -173,7 +183,10 @@ const DataStore = new (function(){
     if (this.cssPieces === null) {
       return "";
     }
-    const basicCssString = Utils.combineCssPieces(this.cssPieces.filter(p => p.selected));
+    const basicCssString = Utils.combineCssPieces(
+      this.cssPieces.filter(p => p.selected),
+      this._minifyCssOption
+    );
     if (this._scopeCssModule && !disallowScoped) {
       return Utils.addCssModuleScopeClass(basicCssString);
     }
