@@ -1,9 +1,10 @@
 <!doctype html>
 <html>
   <head>
+    <link rel="stylesheet" href="lib/nouislider.min.css">
     <link rel="stylesheet" href="lib/prism.css">
     <style>
-      html, body{
+      html, body {
         margin: 0;
         padding: 0;
         height: 100vh;
@@ -23,7 +24,8 @@
         background: #e2e1e0;
       }
       .action-menu {
-        margin-bottom: 1em;
+        padding: 1em;
+        margin-bottom: 2em;
       }
       .pane {
         width: 50%;
@@ -67,15 +69,14 @@
         height: 40%;
       }
     </style>
+    <script src="lib/nouislider.min.js"></script>
     <script src="lib/prism.js"></script>
   </head>
   <body>
     <div class="main">
       <div class="pane pane-left">
         <div class="action-menu">
-          <button id="pirateElement">Pirate (todo:remove + run onchange)</button>
-          <input type="checkbox" id="include-parents-switch" />Include parent nodes
-          <span>"todo:HelpIcon+tooltip"<span>
+          <div id="tree-range-slider"></div>
         </div>
         <pre id="inspectedResultWrapper" class="code-block"><code id="inspectedResult" class="language-markup">Last inspected element.</code>
         </pre>
@@ -83,8 +84,9 @@
       </div>
       <div class="pane pane-right">
         <div>
-          <button id="open-window-result">Open result externally</button>
+          <button id="open-window-result">(new-window-glyph) Open result externally</button>
           <input type="checkbox" id="scope-css-switch" />Scope CSS for reuse
+          <input type="checkbox" id="minify-css-switch" />Minify CSS (TODO)
         </div>
         <pre id="cssResultWrapper" class="code-block"><code id="cssResult" class="language-css">CSS result will display here</code>
         </pre>

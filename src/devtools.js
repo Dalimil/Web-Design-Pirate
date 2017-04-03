@@ -142,11 +142,11 @@ const Utils = {
     for (let i = 0; i < levelStart; i++) {
       $html = $html.children().first(); // safe even for an empty selection
     }
-    const removeDeeperThan = ($el, maxDepth) => {
+    const removeDeeperThan = ($element, maxDepth) => {
       if (maxDepth <= 0) {
-        return $el.empty();
+        return $element.empty();
       }
-      removeDeeperThan.children.each((ind, el) => {
+      $element.children().each((ind, el) => {
         removeDeeperThan(jQuery(el), maxDepth-1);
       });
     };
@@ -161,13 +161,13 @@ const Utils = {
  * Single DataStore instance that handles all data
  */
 const DataStore = new (function(){
-  this.lastInspectedData = null; // { element, fullHtml, href }
+  this.lastInspectedData = null; // { element, fullHtml, href, elementTreeDepth, fullTreeDepth }
   this.inputHtml = null; // maybe change to a function to allow editable textarea
   this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
   this.cssPieces = null;
   this.originalSheetLengths = {}; // { sourceA.css => 54321 chars }
-  this._includeParents = false;
   this._scopeCssModule = false;
+  this._minifyCssOption = false;
 
   this.getCssString = function(disallowScoped) {
     if (this.cssPieces === null) {
@@ -180,15 +180,14 @@ const DataStore = new (function(){
     return basicCssString;
   };
 
-  this._updateInputHtml = function() {
+  this.setHtmlTreeRange = function(levelStart, levelEnd) {
     if (this.lastInspectedData === null) {
       return;
     }
-    if (this._includeParents) {
+    if (levelStart == 0 && levelEnd == this.lastInspectedData.fullTreeDepth) {
       this.inputHtml = this.lastInspectedData.fullHtml;
-    } else {
-      this.inputHtml = this.lastInspectedData.element;
     }
+    this.inputHtml = Utils.getHtmlBetweenTreeLevels(this.lastInspectedData.fullHtml, levelStart, levelEnd);
   }
 
   this.pullLastInspectedData = function() {
@@ -196,18 +195,18 @@ const DataStore = new (function(){
       this.lastInspectedData = result;
       this.lastInspectedData.element = Utils.normalizeRawHtml(result.element, result.href);
       this.lastInspectedData.fullHtml = Utils.normalizeRawHtml(result.fullHtml, result.href);
+      this.lastInspectedData.elementTreeDepth = Utils.getHtmlTreeDepth(result.element);
+      this.lastInspectedData.fullTreeDepth = Utils.getHtmlTreeDepth(result.fullHtml);
+      this.inputHtml = this.lastInspectedData.fullHtml;
       Log(result.href, result, this.lastInspectedData);
-      this._updateInputHtml();
     });
-  };
-
-  this.setIncludeParents = function(include) {
-    this._includeParents = include;
-    this._updateInputHtml();
   };
 
   this.setScopeCssModule = function(setScope) {
     this._scopeCssModule = setScope;
+  };
+  this.setMinifyCssOption = function(setMinify) {
+    this._minifyCssOption = setMinify;
   };
 
   this.pullUncssResult = function() {
@@ -245,22 +244,24 @@ const DataStore = new (function(){
 function PanelEnvironment(panelWindow) {
   const doc = panelWindow.document;
   const Prism = panelWindow.Prism; // syntax color highlighting
+  const NoUiSlider = panelWindow.noUiSlider;
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
+  const $treeRangeSlider = doc.querySelector("#tree-range-slider");
   const $resultCssDisplay = doc.querySelector("#cssResult");
   const $resultStatsDisplay = doc.querySelector("#statsResult");
   const $resultPreview = doc.querySelector("#previewResult");
-  const $includeParentsSwitch = doc.querySelector("#include-parents-switch");
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
+  const $minifyCssSwitch = doc.querySelector("#minify-css-switch");
   const $openResultWindow = doc.querySelector("#open-window-result");
 
-  $includeParentsSwitch.addEventListener('change', () => {
-    DataStore.setIncludeParents($includeParentsSwitch.checked);
-    if (DataStore.inputHtml) {
-      onInputHtmlChanged();
-    }
-  });
   $scopeCssSwitch.addEventListener('change', () => {
     DataStore.setScopeCssModule($scopeCssSwitch.checked);
+    if (DataStore.cssPieces) {
+      updateResultPreview();
+    }
+  });
+  $minifyCssSwitch.addEventListener('change', () => {
+    DataStore.setMinifyCssOption($minifyCssSwitch.checked);
     if (DataStore.cssPieces) {
       updateResultPreview();
     }
@@ -301,17 +302,22 @@ function PanelEnvironment(panelWindow) {
   function updateLastInspected() {
     $inspectedDisplay.textContent = "";
     DataStore.pullLastInspectedData().then(() => {
+      initTreeRangeSlider();
       onInputHtmlChanged();
     }).catch(e => {
+      Log(e);
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
   }
 
   let lastProcessFinished = true;
+  let scheduledPirateTimeout = null;
   function pirateElement() {
     if (!lastProcessFinished) {
       Log("Not yet finished");
-      setTimeout(pirateElement, 1000);
+      // try later; overwrite prev. scheduled timeouts to slow down
+      clearTimeout(scheduledPirateTimeout);
+      scheduledPirateTimeout = setTimeout(pirateElement, 1000);
       return;
     }
     lastProcessFinished = false;
@@ -369,6 +375,33 @@ function PanelEnvironment(panelWindow) {
     });
     $resultStatsDisplay.innerHTML = "";
     $resultStatsDisplay.appendChild(boxList);
+  }
+
+  function initTreeRangeSlider() {
+    const maxDepth = DataStore.lastInspectedData.fullTreeDepth;
+    const targetDepth = maxDepth - DataStore.lastInspectedData.elementTreeDepth;
+
+    if ($treeRangeSlider.noUiSlider) {
+      $treeRangeSlider.noUiSlider.destroy();
+    }
+    NoUiSlider.create($treeRangeSlider, {
+      start: [targetDepth, maxDepth],
+      connect: true,
+      step: 1,
+      range: { min: 0, max: maxDepth },
+      pips: {
+        mode: 'steps',
+        values: [0, targetDepth, maxDepth],
+        density: 1<<30
+	    }
+    });
+    $treeRangeSlider.noUiSlider.on('update', (values, handle) => {
+      const from = Math.round(values[0]);
+      const to = Math.round(values[1]);
+      Log(from, to);
+      DataStore.setHtmlTreeRange(from, to);
+      onInputHtmlChanged();
+    });
   }
 
   return {
