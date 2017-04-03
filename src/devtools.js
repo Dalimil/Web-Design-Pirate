@@ -245,7 +245,6 @@ const DataStore = new (function(){
 function PanelEnvironment(panelWindow) {
   const doc = panelWindow.document;
   const Prism = panelWindow.Prism; // syntax color highlighting
-  const $pirateElement = doc.querySelector("#pirateElement");
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $resultCssDisplay = doc.querySelector("#cssResult");
   const $resultStatsDisplay = doc.querySelector("#statsResult");
@@ -254,16 +253,10 @@ function PanelEnvironment(panelWindow) {
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
   const $openResultWindow = doc.querySelector("#open-window-result");
 
-  $pirateElement.disabled = true;
-  $pirateElement.addEventListener('click', () => {
-    if (DataStore.canPirate()) {
-      pirateElement();
-    }
-  });
   $includeParentsSwitch.addEventListener('change', () => {
     DataStore.setIncludeParents($includeParentsSwitch.checked);
     if (DataStore.inputHtml) {
-      updateInspectedDisplayContent();
+      onInputHtmlChanged();
     }
   });
   $scopeCssSwitch.addEventListener('change', () => {
@@ -296,15 +289,19 @@ function PanelEnvironment(panelWindow) {
     }
   }
 
-  function updateInspectedDisplayContent() {
+  function onInputHtmlChanged() {
+    // Update html display
     $inspectedDisplay.innerHTML = Prism.highlight(DataStore.inputHtml, Prism.languages.html);
+    // Immediately pirate
+    if (DataStore.canPirate()) {
+      pirateElement();
+    }
   }
 
   function updateLastInspected() {
     $inspectedDisplay.textContent = "";
     DataStore.pullLastInspectedData().then(() => {
-      $pirateElement.disabled = false;
-      updateInspectedDisplayContent();
+      onInputHtmlChanged();
     }).catch(e => {
       $inspectedDisplay.textContent = "Nothing inspected recently.";
     });
@@ -314,10 +311,10 @@ function PanelEnvironment(panelWindow) {
   function pirateElement() {
     if (!lastProcessFinished) {
       Log("Not yet finished");
+      setTimeout(pirateElement, 1000);
       return;
     }
     lastProcessFinished = false;
-    $pirateElement.disabled = true;
     $openResultWindow.disabled = true;
     $resultCssDisplay.textContent = "";
     $resultStatsDisplay.textContent = "";
@@ -326,7 +323,6 @@ function PanelEnvironment(panelWindow) {
     DataStore.pullUncssResult().then(() => {
       createCssSelection(DataStore.cssPieces);
       updateResultPreview();
-      $pirateElement.disabled = false;
       $openResultWindow.disabled = false;
       lastProcessFinished = true;
     })
