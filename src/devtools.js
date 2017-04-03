@@ -380,7 +380,6 @@ function PanelEnvironment(panelWindow) {
   function initTreeRangeSlider() {
     const maxDepth = DataStore.lastInspectedData.fullTreeDepth;
     const targetDepth = maxDepth - DataStore.lastInspectedData.elementTreeDepth;
-
     if ($treeRangeSlider.noUiSlider) {
       $treeRangeSlider.noUiSlider.destroy();
     }
@@ -391,14 +390,15 @@ function PanelEnvironment(panelWindow) {
       range: { min: 0, max: maxDepth },
       pips: {
         mode: 'steps',
-        values: [0, targetDepth, maxDepth],
-        density: 1<<30
+        density: 100/maxDepth
 	    }
     });
     $treeRangeSlider.noUiSlider.on('update', (values, handle) => {
       const from = Math.round(values[0]);
       const to = Math.round(values[1]);
-      Log(from, to);
+      if (from == maxDepth) { 
+        return; // no nodes - prevent this
+      }
       DataStore.setHtmlTreeRange(from, to);
       onInputHtmlChanged();
     });
