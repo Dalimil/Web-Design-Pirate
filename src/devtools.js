@@ -179,6 +179,7 @@ const DataStore = new (function(){
   this.originalSheetLengths = {}; // { sourceA.css => 54321 chars }
   this._scopeCssModule = false;
   this._minifyCssOption = false;
+  this.previewInExternalWindow = false;
 
   this.getCssString = function(disallowScoped) {
     if (this.cssPieces === null) {
@@ -221,6 +222,15 @@ const DataStore = new (function(){
   };
   this.setMinifyCssOption = function(setMinify) {
     this._minifyCssOption = setMinify;
+  };
+  this.setPreviewInExternalWindow = function(setPreviewExternal) {
+    this.previewInExternalWindow = setPreviewExternal;
+  };
+
+  this.getResultSrcDoc = function() {
+    const injectedScriptFilename = "/src/result-popup/iframeInjected.js";
+    return `<style>${this.getCssString(true)}</style>${this.inputHtml}
+      <script src="${injectedScriptFilename}"></script>`;
   };
 
   this.pullUncssResult = function() {
@@ -266,25 +276,21 @@ function PanelEnvironment(panelWindow) {
   const $resultPreview = doc.querySelector("#previewResult");
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
   const $minifyCssSwitch = doc.querySelector("#minify-css-switch");
-  const $openResultWindow = doc.querySelector("#open-window-result");
+  const $openResultWindow = doc.querySelector("#new-window-result");
   
   initTabLayouts(panelWindow.jQuery);
 
   $scopeCssSwitch.addEventListener('change', () => {
     DataStore.setScopeCssModule($scopeCssSwitch.checked);
-    if (DataStore.cssPieces) {
-      updateResultPreview();
-    }
+    updateResultPreview();
   });
   $minifyCssSwitch.addEventListener('change', () => {
     DataStore.setMinifyCssOption($minifyCssSwitch.checked);
-    if (DataStore.cssPieces) {
-      updateResultPreview();
-    }
+    updateResultPreview();
   });
-  $openResultWindow.disabled = true;
-  $openResultWindow.addEventListener('click', () => {
-    backgroundApi.requestResultWindow(getResultSrcDoc());
+  $openResultWindow.addEventListener('change', () => {
+    DataStore.setPreviewInExternalWindow($openResultWindow.checked);
+    updateExternalPreview();
   });
 
   // update on first panel show
@@ -337,7 +343,6 @@ function PanelEnvironment(panelWindow) {
       return;
     }
     lastProcessFinished = false;
-    $openResultWindow.disabled = true;
     $resultCssDisplay.textContent = "";
     $resultStatsDisplay.textContent = "";
     $resultPreview.srcdoc = "";
@@ -345,7 +350,6 @@ function PanelEnvironment(panelWindow) {
     DataStore.pullUncssResult().then(() => {
       createCssSelection(DataStore.cssPieces);
       updateResultPreview();
-      $openResultWindow.disabled = false;
       lastProcessFinished = true;
     })
     .catch(e => {
@@ -355,15 +359,18 @@ function PanelEnvironment(panelWindow) {
   }
 
   function updateResultPreview() {
-    const cssString = DataStore.getCssString();
-    $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
-    $resultPreview.srcdoc = getResultSrcDoc();
+    if (DataStore.cssPieces) {
+      const cssString = DataStore.getCssString();
+      $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
+      $resultPreview.srcdoc = DataStore.getResultSrcDoc();
+      updateExternalPreview();
+    }
   }
 
-  function getResultSrcDoc() {
-    const injectedScriptFilename = "/src/result-popup/iframeInjected.js";
-    return `<style>${DataStore.getCssString(true)}</style>${DataStore.inputHtml}
-      <script src="${injectedScriptFilename}"></script>`;
+  function updateExternalPreview() {
+    if (DataStore.previewInExternalWindow && DataStore.cssPieces) {
+      backgroundApi.requestResultWindow(DataStore.getResultSrcDoc());
+    }
   }
 
   function createCssSelection(cssPieces) {

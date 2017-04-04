@@ -20,7 +20,6 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 - Add loading spinner indicator? Pulling stylesheets progress? http://materializecss.com/preloader.html
 - Add a help icon with tooltip explaining usage
 - It's painfully slow (devtools freeze) for large chunks of HTML (e.g. expedia html body) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
-- external preview window should be kept updated automatically (on rerender - same as embeded iframe)
 - Perform repeated uncss requests with reduced css (from previous calls) and only first call with all stylesheets; Also cache responses for different tree slider values
 - Publish: https://developer.chrome.com/webstore/get_started_simple
 
