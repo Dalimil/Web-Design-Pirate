@@ -33,17 +33,17 @@ const Utils = {
       `/* ${hrString}\n * ${source} \n * ${hrString} \n */\n\n${cssText}`
     ).join("\n\n");
 
-    if (minifyCss) {
-      const invSplitter = "_A_A_";
-      const beautified = css_beautify(cssString, { indent_size: 1, indent_char: " " }) + "\n";
-      return beautified
-        .replace(/\n}\r?\n/g, invSplitter) // mark lines of future interest
-        .replace(/\r?\n/g, "") // remove all newlines
-        .replace(new RegExp(invSplitter, 'g'), "}\n") // put lines of interest back
-        .replace(/\*\//g, "*/\n"); // fix block comments ending
-    } else {
-      return css_beautify(cssString);
-    }
+    return minifyCss ? Utils.minifyCssString(cssString) : css_beautify(cssString);
+  },
+
+  minifyCssString(cssString) {
+    const invSplitter = "_A_A_";
+    const beautified = css_beautify(cssString, { indent_size: 1, indent_char: " " }) + "\n";
+    return beautified
+      .replace(/\n}\r?\n/g, invSplitter) // mark lines of future interest
+      .replace(/\r?\n/g, "") // remove all newlines
+      .replace(new RegExp(invSplitter, 'g'), "}\n") // put lines of interest back
+      .replace(/\*\//g, "*/\n"); // fix block comments ending
   },
 
   replaceRelativePaths(htmlString, baseUrl) {
@@ -75,7 +75,7 @@ const Utils = {
     return (Math.random() + 1).toString(36).substr(2, len);
   },
 
-  addCssModuleScopeClass(cssString) {
+  addCssModuleScopeClass(cssString, minifyCss) {
     try {
       const classModulePrefix = `__${Utils.randomString(6)}`;
       const cssAst = cssParser.parse(cssString, { silent: false });
@@ -85,7 +85,8 @@ const Utils = {
         }
       });
       Log(cssAst);
-      return cssParser.stringify(cssAst);
+      const resultCssString = cssParser.stringify(cssAst);
+      return minifyCss ? Utils.minifyCssString(resultCssString) : resultCssString;
     } catch(e) {
       // Parse error, return original string
       return cssString;
@@ -188,7 +189,7 @@ const DataStore = new (function(){
       this._minifyCssOption
     );
     if (this._scopeCssModule && !disallowScoped) {
-      return Utils.addCssModuleScopeClass(basicCssString);
+      return Utils.addCssModuleScopeClass(basicCssString, this._minifyCssOption);
     }
     return basicCssString;
   };

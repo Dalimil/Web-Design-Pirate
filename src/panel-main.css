@@ -20,8 +20,8 @@ html {
   background: #e2e1e0;
 }
 .action-menu {
-  padding: 1em;
-  margin-bottom: 2em;
+  padding: 0.5em 1em 0;
+  margin-bottom: 1.8em;
 }
 .pane {
   width: 50%;
@@ -60,6 +60,7 @@ html {
   width: 100%;
 }
 #statsResult {
+  min-height: 30%;
   max-height: 100%;
   width: 100%;
 }
@@ -99,10 +100,10 @@ html {
 .tabs-header > li {
   display: inline-block;
   width: 120px;
-  height: 40px;
+  height: 30px;
   font-size: 12px;
   text-align: center;
-  line-height: 40px;
+  line-height: 30px;
   color: #111;
   font-weight: bold;
   position: relative;
@@ -115,7 +116,7 @@ html {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: 2px;
   background: #3E82F7;
   -webkit-transition: all 0.4s;
   transition: all 0.4s;
