@@ -266,6 +266,8 @@ function PanelEnvironment(panelWindow) {
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
   const $minifyCssSwitch = doc.querySelector("#minify-css-switch");
   const $openResultWindow = doc.querySelector("#open-window-result");
+  
+  initTabLayouts(panelWindow.jQuery);
 
   $scopeCssSwitch.addEventListener('change', () => {
     DataStore.setScopeCssModule($scopeCssSwitch.checked);
@@ -414,6 +416,42 @@ function PanelEnvironment(panelWindow) {
       }
       DataStore.setHtmlTreeRange(from, to);
       onInputHtmlChanged();
+    });
+  }
+
+  function initTabLayouts(panelJQuery) {
+    const tabWidth = 120;
+    panelJQuery(".tabs-header > li").click(e => {
+      const $el = panelJQuery(e.target);
+      const $tabsBlock = $el.parents(".tabs-layout").first();
+
+      if ($el.hasClass('slider')) {
+        return; // prevent slider click
+      }
+      $el.parent().find(".slider").css({
+        left: (tabWidth * $el.index()) + "px"
+      });
+
+      // Remove olds ripples and add the new ripple element
+      $tabsBlock.find(".ripple").remove();
+      $el.prepend("<span class='ripple'></span>");
+
+      const rippleDim = Math.max($el.width(), $el.height());
+      const x = e.pageX - $el.offset().left - rippleDim / 2;
+      const y = e.pageY - $el.offset().top - rippleDim / 2;
+
+      // Add the ripples CSS and start the animation
+      $tabsBlock.find(".ripple").css({
+        width: rippleDim,
+        height: rippleDim,
+        top: y + 'px',
+        left: x + 'px'
+      }).addClass("rippleEffect");
+
+      // Switch tabs
+      const tabTarget = panelJQuery($el.data("href"));
+      $tabsBlock.find(".tab-target.active").removeClass("active");
+      tabTarget.addClass("active");
     });
   }
 

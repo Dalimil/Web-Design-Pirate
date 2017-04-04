@@ -1,0 +1,154 @@
+/* Custom CSS for my devtools panel */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+}
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+.main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #e2e1e0;
+}
+.action-menu {
+  padding: 1em;
+  margin-bottom: 2em;
+}
+.pane {
+  width: 50%;
+  padding: 0 1em;
+}
+.code-block {
+  font-family: monospace;
+  font-size: 1em;
+  color: #222;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  overflow: auto;
+  padding: 5px;
+  margin-bottom: 1em;
+  resize: none;
+  border: 1px solid #888;
+  border-radius: 2px;
+  background: #eee;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+.z-depth-1 {
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);
+}
+.source-item {
+  margin-bottom: 1em;
+}
+.source-item-title {
+  font-size: 1.2em;
+}
+#inspectedResultWrapper {
+  height: 100%;
+  width: 100%;
+}
+#cssResultWrapper {
+  height: 100%;
+  width: 100%;
+}
+#statsResult {
+  max-height: 100%;
+  width: 100%;
+}
+#previewResult {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* TABS */
+.tabs-layout {
+	display: flex;
+	flex-direction: column;
+}
+.tab-target {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.tab-target:not(.active) {
+	display: none;
+}
+
+.tabs-header {
+  font-size: 0;
+  position: relative;
+  padding: 0;
+  margin: 10px 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+	align-self: flex-start;
+  background: #f3f3f3;
+  border-radius: 2px;
+}
+
+.tabs-header > li {
+  display: inline-block;
+  width: 120px;
+  height: 40px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 40px;
+  color: #111;
+  font-weight: bold;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tabs-header > .slider {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #3E82F7;
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+  will-change: left;
+}
+
+/*  Ripple */
+.ripple {
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(62, 130, 247, 0.3);
+  -webkit-transform: scale(0);
+  transform: scale(0);
+  position: absolute;
+  opacity: 1;
+}
+
+.rippleEffect {
+  -webkit-animation: rippleDrop .5s linear;
+  animation: rippleDrop .5s linear;
+}
+ @-webkit-keyframes 
+rippleDrop {  100% {
+ -webkit-transform: scale(2);
+ transform: scale(2);
+ opacity: 0;
+}
+}
+ @keyframes 
+rippleDrop {  100% {
+ -webkit-transform: scale(2);
+ transform: scale(2);
+ opacity: 0;
+}
+}

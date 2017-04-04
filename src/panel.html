@@ -3,94 +3,53 @@
   <head>
     <link rel="stylesheet" href="lib/panel/nouislider.css">
     <link rel="stylesheet" href="lib/panel/prism.css">
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        width: 100vw;
-      }
-      html {
-        box-sizing: border-box;
-      }
-      *, *:before, *:after {
-        box-sizing: inherit;
-      }
-      .main {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: space-around;
-        background: #e2e1e0;
-      }
-      .action-menu {
-        padding: 1em;
-        margin-bottom: 2em;
-      }
-      .pane {
-        width: 50%;
-        padding: 1em;
-      }
-      .code-block {
-        font-family: monospace;
-        font-size: 1em;
-        color: #222;
-        white-space: pre-wrap;
-        overflow-wrap: break-word;
-        overflow: auto;
-        padding: 5px;
-        margin-bottom: 1em;
-        resize: none;
-        border: 1px solid #888;
-        border-radius: 2px;
-        background: #eee;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-      }
-      .source-item {
-        margin-bottom: 1em;
-      }
-      .source-item-title {
-        font-size: 1.2em;
-      }
-      #inspectedResultWrapper {
-        height: 40%;
-        width: 100%;
-      }
-      #cssResultWrapper {
-        height: 60%;
-        width: 100%;
-      }
-      #statsResult {
-        height: 30%;
-        width: 100%;
-      }
-      #previewResult {
-        width: 100%;
-        height: 40%;
-      }
-    </style>
+    <link rel="stylesheet" href="panel-main.css">
     <script src="lib/panel/nouislider.min.js"></script>
     <script src="lib/panel/prism.js"></script>
+    <script src="lib/jquery-3.2.0.min.js"></script>
   </head>
   <body>
     <div class="main">
-      <div class="pane pane-left">
-        <div class="action-menu">
-          <div id="tree-range-slider"></div>
+      <div class="pane pane-left tabs-layout">
+        <ul class="tabs-header z-depth-1">
+          <li data-href="#tab-a-1">HTML Input</li>
+          <li data-href="#tab-a-2">CSS Input</li>
+          <li class="slider"></li>
+        </ul>
+        <div id="tab-a-1" class="tab-target active">
+          <div class="action-menu">
+            <div id="tree-range-slider"></div>
+          </div>
+          <pre id="inspectedResultWrapper" class="code-block"><code id="inspectedResult" class="language-markup">Last inspected element.</code>
+          </pre>
         </div>
-        <pre id="inspectedResultWrapper" class="code-block"><code id="inspectedResult" class="language-markup">Last inspected element.</code>
-        </pre>
-        <iframe id="previewResult" srcdoc=""></iframe>
+        <div id="tab-a-2" class="tab-target">
+          --TODO - include/exclude stylesheets here
+        </div>
       </div>
-      <div class="pane pane-right">
-        <div>
-          <button id="open-window-result">(new-window-glyph) Open result externally</button>
-          <input type="checkbox" id="scope-css-switch" />Scope CSS for reuse
-          <input type="checkbox" id="minify-css-switch" />Minify CSS
+
+      <div class="pane pane-right tabs-layout">
+        <ul class="tabs-header z-depth-1">
+          <li data-href="#tab-b-1">CSS Stats</li>
+          <li data-href="#tab-b-2">CSS Result</li>
+          <li data-href="#tab-b-3">Preview</li>
+          <li class="slider"></li>
+        </ul>
+        <div id="tab-b-1" class="tab-target active">
+          <div id="statsResult" class="code-block">Statistics will display here</div>
         </div>
-        <pre id="cssResultWrapper" class="code-block"><code id="cssResult" class="language-css">CSS result will display here</code>
-        </pre>
-        <div id="statsResult" class="code-block">Statistics will display here</div>
+        <div id="tab-b-2" class="tab-target">
+          <div>
+            <input type="checkbox" id="scope-css-switch" />Scope CSS for reuse
+            <input type="checkbox" id="minify-css-switch" />Minify CSS
+          </div>
+          <pre id="cssResultWrapper" class="code-block"><code id="cssResult" class="language-css">CSS result will display here</code>
+          </pre>
+        </div>
+        <div id="tab-b-3" class="tab-target">
+          <button id="open-window-result">(new-window-glyph) Open result externally</button>
+          <iframe id="previewResult" srcdoc=""></iframe>
+        </div>
       </div>
     </div>
   </body>
