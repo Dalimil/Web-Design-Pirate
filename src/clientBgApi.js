@@ -16,7 +16,10 @@ const backgroundApi = (() => {
 
   function requestStyleSheetsContent(tabId) {
     if (lastCachedStyleSheetsResponse !== null && tabId === lastCachedStyleSheetsTabId) {
-      return Promise.resolve(lastCachedStyleSheetsResponse);
+      return Promise.resolve({
+        styleSheets: lastCachedStyleSheetsResponse,
+        hasChanged: false
+      });
     }
     // First pull hrefs from content DOM and then 'fetch' in background.js
     return contentScripts.getStyleSheets().then(styleSheets => {
@@ -28,7 +31,10 @@ const backgroundApi = (() => {
         }, function(response) {
           lastCachedStyleSheetsTabId = tabId;
           lastCachedStyleSheetsResponse = response;
-          resolve(response);
+          resolve({
+            styleSheets: response,
+            hasChanged: true
+          });
         });
       });
     });

@@ -59,7 +59,7 @@ html {
   height: 100%;
   width: 100%;
 }
-#statsResult {
+#statsResult, #styleSheetsInput {
   min-height: 30%;
   max-height: 100%;
   width: 100%;

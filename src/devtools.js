@@ -154,6 +154,9 @@ const Utils = {
       $html = $html.children().first(); // safe even for an empty selection
     }
     const removeDeeperThan = ($element, maxDepth) => {
+      if ($element.children().length == 0) {
+        return;
+      }
       if (maxDepth <= 0) {
         return $element.empty();
       }
@@ -174,9 +177,12 @@ const Utils = {
 const DataStore = new (function(){
   this.lastInspectedData = null; // { element, fullHtml, href, elementTreeDepth, fullTreeDepth }
   this.inputHtml = null; // maybe change to a function to allow editable textarea
-  this.canPirate = () => this.inputHtml && this.inputHtml.length > 0;
+  this.pageStyleSheets = null; // [ { source, cssText, isInternal, filename }, ...]
+  this._styleSheetMap = {} // { example.com/a.css => (ref)pageStyleSheets, ... }
+  this.getStyleSheet = (source) => this._styleSheetMap[source]; // quick dictionary access by source
+  this.canPirate = () => this.inputHtml && this.inputHtml.length > 0 && this.pageStyleSheets;
   this.cssPieces = null;
-  this.originalSheetLengths = {}; // { sourceA.css => 54321 chars }
+  this.getSelectedCssPieces = () => this.cssPieces.filter(p => this.getStyleSheet(p.source).selected);
   this._scopeCssModule = false;
   this._minifyCssOption = false;
   this.previewInExternalWindow = false;
@@ -186,7 +192,7 @@ const DataStore = new (function(){
       return "";
     }
     const basicCssString = Utils.combineCssPieces(
-      this.cssPieces.filter(p => p.selected),
+      this.getSelectedCssPieces(),
       this._minifyCssOption
     );
     if (this._scopeCssModule && !disallowScoped) {
@@ -233,18 +239,24 @@ const DataStore = new (function(){
       <script src="${injectedScriptFilename}"></script>`;
   };
 
-  this.pullUncssResult = function() {
+  this.pullStylesheets = function() {
     return backgroundApi.requestStyleSheetsContent(chrome.devtools.inspectedWindow.tabId)
-      .then(styleSheets => {
-        Log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
-        this.originalSheetLengths = {};
-        styleSheets.forEach(sheet => {
-          if (sheet.source) {
-            this.originalSheetLengths[sheet.source] = sheet.cssText.length;
-          }
-        });
-        return backgroundApi.requestUncss(this.inputHtml, styleSheets);
-      })
+      .then(({ styleSheets, hasChanged }) => {
+        if (hasChanged) {
+          Log("STYLESHEETS", styleSheets, styleSheets.map(c => c.cssText.length));
+          this.pageStyleSheets = styleSheets;
+          this._styleSheetMap = {};
+          styleSheets.forEach(sheet => {
+            sheet.selected = true;
+            this._styleSheetMap[sheet.source] = sheet;
+          });
+        }
+        return hasChanged;
+      });
+  };
+
+  this.pullUncssResult = function() {
+    return backgroundApi.requestUncss(this.inputHtml, this.pageStyleSheets)
       .then(cssData => {
         if (!cssData || !cssData.cssPieces) {
           throw new Error(cssData);
@@ -252,8 +264,7 @@ const DataStore = new (function(){
         Log("done", cssData);
         this.cssPieces = cssData.cssPieces;
         this.cssPieces.forEach(piece => {
-          piece.selected = true;
-          const sheetUrl = piece.source == "internal" ? this.lastInspectedData.href : piece.source;
+          const sheetUrl = piece.isInternal ? this.lastInspectedData.href : piece.source;
           piece.cssText = Utils.replaceCssRelativeUrls(piece.cssText, sheetUrl);
         });
       });
@@ -271,6 +282,7 @@ function PanelEnvironment(panelWindow) {
   const NoUiSlider = panelWindow.noUiSlider;
   const $inspectedDisplay = doc.querySelector("#inspectedResult");
   const $treeRangeSlider = doc.querySelector("#tree-range-slider");
+  const $styleSheetsInputDisplay = doc.querySelector("#styleSheetsInput");
   const $resultCssDisplay = doc.querySelector("#cssResult");
   const $resultStatsDisplay = doc.querySelector("#statsResult");
   const $resultPreview = doc.querySelector("#previewResult");
@@ -295,10 +307,18 @@ function PanelEnvironment(panelWindow) {
 
   // update on first panel show
   updateLastInspected();
-  let updateQueued = false;
+  updateInputStylesheets();
+  let updateQueued = {
+    inputHtml: false,
+    inputStylesheets: false
+  };
   // event onElementSelectionChanged
   chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-    updateQueued = true;
+    updateQueued.inputHtml = true;
+  });
+  chrome.devtools.network.onNavigated.addListener(() => {
+    updateQueued.inputHtml = true;
+    updateQueued.inputStylesheets = true;
   });
 
   /** Called everytime user switches to this panel */
@@ -306,19 +326,20 @@ function PanelEnvironment(panelWindow) {
     if (win !== panelWindow) {
       throw new Error("global window changed for panel environment")
     }
-    if (updateQueued) {
-      updateQueued = false;
+    if (updateQueued.inputHtml) {
+      updateQueued.inputHtml = false;
       updateLastInspected();
+    }
+    if (updateQueued.inputStylesheets) {
+      updateQueued.inputStylesheets = false;
+      updateInputStylesheets();
     }
   }
 
   function onInputHtmlChanged() {
     // Update html display
     $inspectedDisplay.innerHTML = Prism.highlight(DataStore.inputHtml, Prism.languages.html);
-    // Immediately pirate
-    if (DataStore.canPirate()) {
-      pirateElement();
-    }
+    tryPirate();
   }
 
   function updateLastInspected() {
@@ -332,23 +353,40 @@ function PanelEnvironment(panelWindow) {
     });
   }
 
+  function updateInputStylesheets() {
+    $styleSheetsInputDisplay.textContent = "";
+    DataStore.pullStylesheets().then(hasChanged => {
+      if (hasChanged) {
+        initCssSelection();
+        tryPirate();
+      }
+    }).catch(e => {
+      Log(e);
+      $styleSheetsInputDisplay.textContent = JSON.stringify(e);
+    });
+  }
+
   let lastProcessFinished = true;
   let scheduledPirateTimeout = null;
-  function pirateElement() {
-    if (!lastProcessFinished) {
-      Log("Not yet finished");
-      // try later; overwrite prev. scheduled timeouts to slow down
-      clearTimeout(scheduledPirateTimeout);
-      scheduledPirateTimeout = setTimeout(pirateElement, 1000);
-      return;
+
+  function tryPirate() {
+    if (DataStore.canPirate()) {
+      if (!lastProcessFinished) {
+        Log("Not yet finished");
+        // try later; overwrite prev. scheduled timeouts to slow down
+        clearTimeout(scheduledPirateTimeout);
+        scheduledPirateTimeout = setTimeout(tryPirate, 1000);
+        return;
+      }
+      lastProcessFinished = false;
+      _pirateElement();
     }
-    lastProcessFinished = false;
-    $resultCssDisplay.textContent = "";
-    $resultStatsDisplay.textContent = "";
-    $resultPreview.srcdoc = "";
+  }
+
+  function _pirateElement() {
     Log("Pirate starts");
+    // todo: display loading indicator
     DataStore.pullUncssResult().then(() => {
-      createCssSelection(DataStore.cssPieces);
       updateResultPreview();
       lastProcessFinished = true;
     })
@@ -360,6 +398,7 @@ function PanelEnvironment(panelWindow) {
 
   function updateResultPreview() {
     if (DataStore.cssPieces) {
+      initCssStats();
       const cssString = DataStore.getCssString();
       $resultCssDisplay.innerHTML = Prism.highlight(cssString, Prism.languages.css);
       $resultPreview.srcdoc = DataStore.getResultSrcDoc();
@@ -373,22 +412,39 @@ function PanelEnvironment(panelWindow) {
     }
   }
 
-  function createCssSelection(cssPieces) {
+  function initCssStats() {
     const boxList = document.createElement("div");
-    cssPieces.forEach(piece => {
+    DataStore.getSelectedCssPieces().forEach(piece => {
+      const descr = document.createElement("span");
+      let percUsed = DataStore.getStyleSheet(piece.source).cssText.length;
+      percUsed = Math.min(100, 100 * piece.cssText.length / percUsed).toFixed();
+      descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> ` +
+        `(${piece.cssText.length.toLocaleString()} chars used)</span><br>` +
+        `<span>todo: progressbar ~ ${percUsed}%</span>`;
+      
+      const wrapperDiv = document.createElement("div");
+      wrapperDiv.className = "source-item";
+      wrapperDiv.appendChild(descr);
+      boxList.appendChild(wrapperDiv);
+    });
+    $resultStatsDisplay.innerHTML = "";
+    $resultStatsDisplay.appendChild(boxList);
+  }
+
+  function initCssSelection() {
+    const boxList = document.createElement("div");
+    DataStore.pageStyleSheets.forEach(sheet => {
       const input = document.createElement("input");
       input.type = "checkbox";
       input.checked = true;
       input.addEventListener("change", () => {
-        piece.selected = input.checked;
+        sheet.selected = input.checked;
         updateResultPreview();
       });
-
       const descr = document.createElement("span");
-      let percUsed = DataStore.originalSheetLengths[piece.source];
-      percUsed = percUsed ? ` ~ ${Math.min(100, 100 * piece.cssText.length / percUsed).toFixed()}%` : "";
-      descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> ` +
-        `(${piece.cssText.length} chars used${percUsed})</span><br><span>${piece.source}</span>`;
+      const sourceDescr = sheet.isInternal ? "&lt;style&gt; inside the &lt;head&gt; tag" : sheet.source;
+      descr.innerHTML = `<span class="source-item-title"><strong>${sheet.filename}</strong> ` +
+        `(${sheet.cssText.length.toLocaleString()} chars)</span><br><span>${sourceDescr}</span>`;
       const wrapperDiv = document.createElement("div");
       wrapperDiv.className = "source-item";
       wrapperDiv.appendChild(input);
@@ -396,8 +452,8 @@ function PanelEnvironment(panelWindow) {
 
       boxList.appendChild(wrapperDiv);
     });
-    $resultStatsDisplay.innerHTML = "";
-    $resultStatsDisplay.appendChild(boxList);
+    $styleSheetsInputDisplay.innerHTML = "";
+    $styleSheetsInputDisplay.appendChild(boxList);
   }
 
   function initTreeRangeSlider() {

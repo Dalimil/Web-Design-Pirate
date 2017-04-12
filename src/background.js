@@ -66,15 +66,26 @@ function fetchStyleSheetContent(styleSheets) {
   return Promise.all(styleSheets.map(sheet => {
     if (sheet.cssText) {
       return Promise.resolve(sheet.cssText);
-    } else if (sheet.href) {
+    } else if (sheet.href && sheet.href.startsWith("http")) {
       return fetch(sheet.href).then(data => data.text());
     }
     return Promise.resolve(null);
   })).then(values => {
+		let internalSeqId = 0;
     // zip hrefs back and filter out nulls
     return values.map((v, i) => {
+			let source = styleSheets[i].href;
+			let isInternal = false;
+			if (!source) {
+				source = `internal_${internalSeqId}`;
+				isInternal = true;
+				internalSeqId += 1;
+			}
+			const pathname = new URL(source, "https://example.com/").pathname;
       return {
-        source: styleSheets[i].href,
+        source,
+				isInternal,
+				filename: pathname.substring(pathname.lastIndexOf('/') + 1),
         cssText: v
       };
     }).filter(x => x.cssText != null);
@@ -100,16 +111,12 @@ function getCssForHtml(inputHtml, styleSheets) {
 		}
 		const cssPieces = cssTextPieces.map((v, i) => {
 			return {
-				source: styleSheets[i].source || "internal",
+				source: styleSheets[i].source,
+				isInternal: styleSheets[i].isInternal,
+				filename: styleSheets[i].filename,
 				cssText: v.replace(blockCommentRegexp, "").trim()
 			};
 		}).filter(sheet => sheet.cssText.length != 0);
-
-		cssPieces.forEach(piece => {
-			const source = piece.source;
-			const pathname = new URL(source, "https://example.com/").pathname;
-			piece.filename = pathname.substring(pathname.lastIndexOf('/') + 1);
-		});
 
 		return {
 			cssPieces
