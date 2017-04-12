@@ -73,6 +73,34 @@ html {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
+/* SPINNER */
+
+#loading-indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 26px 32px;
+  visibility: hidden;
+}
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+ 
+.spinner:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-top: -12px;
+  margin-left: -12px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #3E82F7;
+  border-bottom-color: #3E82F7;
+  animation: spinner .8s linear infinite;
+}
 
 /* TABS */
 .tabs-layout {

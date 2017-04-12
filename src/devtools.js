@@ -295,6 +295,7 @@ function PanelEnvironment(panelWindow) {
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
   const $minifyCssSwitch = doc.querySelector("#minify-css-switch");
   const $openResultWindow = doc.querySelector("#new-window-result");
+  const $loadingIndicator = doc.querySelector("#loading-indicator");
   
   initTabLayouts(panelWindow.jQuery);
 
@@ -374,7 +375,6 @@ function PanelEnvironment(panelWindow) {
 
   let lastProcessFinished = true;
   let scheduledPirateTimeout = null;
-
   function tryPirate() {
     if (DataStore.canPirate()) {
       if (!lastProcessFinished) {
@@ -391,9 +391,11 @@ function PanelEnvironment(panelWindow) {
 
   function _pirateElement() {
     Log("Pirate starts");
+    $loadingIndicator.style.visibility = "visible";
     // todo: display loading indicator
     DataStore.pullUncssResult().then(() => {
       updateResultPreview();
+      $loadingIndicator.style.visibility = "hidden";
       lastProcessFinished = true;
     })
     .catch(e => {

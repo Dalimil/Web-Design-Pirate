@@ -17,10 +17,7 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 
 ## TODO
 - Copy progressbar style: http://propeller.in/components/progressbar.php (or use http://progressbarjs.readthedocs.io/en/latest/#install)
-- Add loading spinner indicator? Pulling stylesheets progress? http://materializecss.com/preloader.html
-- Add a help icon with tooltip explaining usage
-- It's painfully slow (devtools freeze) for large chunks of HTML (e.g. expedia html body) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
-- Perform repeated uncss requests with reduced css (from previous calls) and only first call with all stylesheets; Also cache responses for different tree slider values
+- For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
 - Publish: https://developer.chrome.com/webstore/get_started_simple
 
 ## Screenshots
