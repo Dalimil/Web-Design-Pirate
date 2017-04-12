@@ -428,7 +428,7 @@ function PanelEnvironment(panelWindow) {
       percUsed = Math.min(100, 100 * piece.cssText.length / percUsed).toFixed();
       descr.innerHTML = `<span class="source-item-title"><strong>${piece.filename}</strong> ` +
         `(${piece.cssText.length.toLocaleString()} chars used)</span><br>` +
-        `<span>todo: progressbar ~ ${percUsed}%</span>`;
+        `<div class="progress"><div class="progress-bar" style="width: ${percUsed}%;">${percUsed}%</div></div>`;
       
       const wrapperDiv = document.createElement("div");
       wrapperDiv.className = "source-item";

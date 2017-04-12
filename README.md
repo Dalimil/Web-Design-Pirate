@@ -16,7 +16,6 @@ It is hard to look at a website and copy only a small part of it (widget/compone
 For instance I like Facebook's *Create a Post* widget. I select it using Chrome Developer Tools Inspector, switch to my Web Design Pirate tab, and copy the result.
 
 ## TODO
-- Copy progressbar style: http://propeller.in/components/progressbar.php (or use http://progressbarjs.readthedocs.io/en/latest/#install)
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume interest in wrapper element)
 - Publish: https://developer.chrome.com/webstore/get_started_simple
 
