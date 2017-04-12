@@ -1,3 +1,4 @@
+// https://github.com/reworkcss/css
 // http://www.w3.org/TR/CSS21/grammar.html
 // https://github.com/visionmedia/css-parse/pull/49#issuecomment-30088027
 var commentre = /\/\*[^*]*\*+([^/*][^*]*\*+)*\//g
