@@ -478,7 +478,7 @@ function PanelEnvironment(panelWindow) {
       pips: {
         mode: 'steps',
         density: 100/maxDepth
-	    }
+      }
     });
     $treeRangeSlider.noUiSlider.on('update', (values, handle) => {
       const from = Math.round(values[0]);

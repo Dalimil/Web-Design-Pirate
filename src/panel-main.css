@@ -105,14 +105,14 @@ html {
 .progress {
   position: relative;
   width: 100%;
-	height: 11px;
-	margin: 4px 0 10px;
-	overflow: hidden;
-	background-color: #f5f5f5;
+  height: 11px;
+  margin: 4px 0 10px;
+  overflow: hidden;
+  background-color: #f5f5f5;
   border: 1px solid #999;
-	border-radius: 4px;
-	-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
 }
 .progress-bar {
   box-shadow: none;
@@ -127,8 +127,8 @@ html {
 
 /* TABS */
 .tabs-layout {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 .tab-target {
   display: flex;
@@ -136,7 +136,7 @@ html {
   height: 100%;
 }
 .tab-target:not(.active) {
-	display: none;
+  display: none;
 }
 
 .tabs-header {
@@ -147,7 +147,7 @@ html {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-	align-self: flex-start;
+  align-self: flex-start;
   background: #f3f3f3;
   border-radius: 2px;
 }
