@@ -134,12 +134,18 @@ const Utils = {
 
   getHtmlTreeDepth(htmlString) {
     let $html = Utils.transformHtmlToJQuery(htmlString);
-    let depth = 0;
-    while ($html.length > 0) {
-      depth += 1;
-      $html = $html.children().first();
-    }
-    return depth;
+
+    const countDepth = ($node) => {
+      if ($node.children().length == 0) {
+        return 1;
+      }
+      let max = 0;
+      $node.children().each((ind, el) => {
+        max = Math.max(max, countDepth(jQuery(el)));
+      });
+      return max + 1;
+    };
+    return countDepth($html);
   },
 
   /**
@@ -154,9 +160,9 @@ const Utils = {
       $html = $html.children().first(); // safe even for an empty selection
     }
     const removeDeeperThan = ($element, maxDepth) => {
-      if ($element.children().length == 0) {
+      /*if ($element.children().length == 0) {
         return;
-      }
+      }*/
       if (maxDepth <= 0) {
         return $element.empty();
       }
