@@ -22,6 +22,8 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 ![Web-Design-Pirate Screenshot - Dalimil](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-2.png)
 ![Web-Design-Pirate Extension - Dalimil](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-3.png)
 
+![Web Design Pirate User Flow](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/flow.gif)
+
 *Outdated (but still demonstrates the basic idea):*
 
 ![Web Design Pirate - Outdated screenshot](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-old.png)
