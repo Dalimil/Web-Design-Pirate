@@ -22,9 +22,11 @@ For instance I like Facebook's *Create a Post* widget. I select it using Chrome 
 ## Screenshots
 *Current state:*
 
-![Web Design Pirate](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot.png)
+![Web Design Pirate - Screenshot 1](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-1.png)
+![Web-Design-Pirate Screenshot - Dalimil](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-2.png)
+![Web-Design-Pirate Extension - Dalimil](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-3.png)
 
 *Outdated:*
 
-![Web Design Pirate - Work in Progress](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-wip.png)
-![Web Design Pirate - Work in Progress 2](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-wip2.png)
+![Web Design Pirate - Outdated screenshot](https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/screenshot-old.png)
+
