@@ -24,6 +24,7 @@ html {
   margin-bottom: 1.8em;
 }
 .pane {
+  position: relative;
   width: 50%;
   padding: 0 1em;
 }
@@ -74,13 +75,14 @@ html {
 }
 
 /* SPINNER */
-#loading-indicator {
+#loading-indicator-right, #loading-indicator-left {
   position: absolute;
   top: 0;
   right: 0;
   margin: 26px 32px;
   visibility: hidden;
 }
+
 @keyframes spinner {
   to {transform: rotate(360deg);}
 }

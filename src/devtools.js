@@ -141,7 +141,8 @@ function PanelEnvironment(panelWindow) {
   const $scopeCssSwitch = doc.querySelector("#scope-css-switch");
   const $minifyCssSwitch = doc.querySelector("#minify-css-switch");
   const $openResultWindow = doc.querySelector("#new-window-result");
-  const $loadingIndicator = doc.querySelector("#loading-indicator");
+  const $loadingIndicatorLeft = doc.querySelector("#loading-indicator-left");
+  const $loadingIndicatorRight = doc.querySelector("#loading-indicator-right");
   
   initTabLayouts(panelWindow.jQuery);
 
@@ -197,13 +198,14 @@ function PanelEnvironment(panelWindow) {
 
   function updateLastInspected() {
     $inspectedDisplay.textContent = "";
-    $loadingIndicator.style.visibility = "visible";
+    $loadingIndicatorLeft.style.visibility = "visible";
     DataStore.pullLastInspectedData().then(() => {
       initTreeRangeSlider();
       onInputHtmlChanged();
-    $loadingIndicator.style.visibility = "hidden";
     }).catch(e => {
       $inspectedDisplay.textContent = e.value;
+    }).then(() => {
+      $loadingIndicatorLeft.style.visibility = "hidden";
     });
   }
 
@@ -238,16 +240,14 @@ function PanelEnvironment(panelWindow) {
 
   function _pirateElement() {
     Log("Pirate starts");
-    $loadingIndicator.style.visibility = "visible";
-    // todo: display loading indicator
+    $loadingIndicatorRight.style.visibility = "visible";
     DataStore.pullUncssResult().then(() => {
       updateResultPreview();
-      $loadingIndicator.style.visibility = "hidden";
+    }).catch(e => {
+      $resultCssDisplay.textContent = "An error occurred. " + e;
+    }).then(() => {
       lastProcessFinished = true;
-    })
-    .catch(e => {
-      console.error("Error when pirating ", e);
-      $resultCssDisplay.textContent = "Error occurred.";
+      $loadingIndicatorRight.style.visibility = "hidden";
     });
   }
 
