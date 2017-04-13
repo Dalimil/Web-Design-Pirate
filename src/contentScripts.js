@@ -22,16 +22,24 @@ const contentScripts = (() => {
    */
   function getLastInspectedElement() {
     if ($0 == null) {
-      throw new Error("Nothing inspected yet.");
+      throw "Select an element using the inspector first.";
     }
+    const invalidElementError = "Invalid element selected. (needs to be inside the body tag)";
     let u = $0;
+    if (u.nodeName.toLowerCase() == "body") {
+      // the whole <body> is often too big and also is the tag selected by default when
+      // switched to Inspector tab, so it might not be what user wants
+      // + pirating the whole body (rather than a single element) is nonsensical
+      throw invalidElementError;
+    }
     let fullHtml = $0.outerHTML;
-    while (u.nodeName.toLowerCase() != "body") {
-      u = u.parentNode;
-      if (u == null) {
-        throw new Error("Invalid element selected.");
+    try {
+      while (u.nodeName.toLowerCase() != "body") {
+        u = u.parentNode;
+        fullHtml = u.outerHTML.replace(u.innerHTML, fullHtml);
       }
-      fullHtml = u.outerHTML.replace(u.innerHTML, fullHtml);
+    } catch (e) {
+      throw invalidElementError;
     }
     
     return {

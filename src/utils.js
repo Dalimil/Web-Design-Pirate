@@ -163,7 +163,6 @@ const Utils = {
       });
     };
     removeDeeperThan($html, levelEnd - levelStart);
-    
     return Utils.transformJQueryToHtml($html);
   }
 };

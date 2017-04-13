@@ -197,12 +197,13 @@ function PanelEnvironment(panelWindow) {
 
   function updateLastInspected() {
     $inspectedDisplay.textContent = "";
+    $loadingIndicator.style.visibility = "visible";
     DataStore.pullLastInspectedData().then(() => {
       initTreeRangeSlider();
       onInputHtmlChanged();
+    $loadingIndicator.style.visibility = "hidden";
     }).catch(e => {
-      Log(e);
-      $inspectedDisplay.textContent = "Nothing inspected recently.";
+      $inspectedDisplay.textContent = e.value;
     });
   }
 
