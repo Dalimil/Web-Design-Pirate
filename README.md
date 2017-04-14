@@ -1,4 +1,4 @@
-# Web Design Pirate
+# Web Design Pirate [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EQYTWEHP59DJ2)
 
 **Chrome DevTools Extension** :boat: :ghost: :anchor:  
 Fast and easy way to copy full HTML widgets, components, and parts of web design.
