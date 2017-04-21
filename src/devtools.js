@@ -340,6 +340,11 @@ function PanelEnvironment(panelWindow) {
       DataStore.setHtmlTreeRange(from, to);
       onInputHtmlChanged();
     });
+    // Highlight element depth value
+    const pips = $treeRangeSlider.querySelectorAll(".noUi-pips > .noUi-value");
+    if (pips[targetDepth]) {
+      pips[targetDepth].style.outline = '1px solid black';
+    }
   }
 
   function initTabLayouts(panelJQuery) {
