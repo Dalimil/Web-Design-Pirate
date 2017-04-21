@@ -330,8 +330,12 @@ function PanelEnvironment(panelWindow) {
     $treeRangeSlider.noUiSlider.on('update', (values, handle) => {
       const from = Math.round(values[0]);
       const to = Math.round(values[1]);
-      if (from == maxDepth) { 
+      /*if (from == maxDepth) {
         return; // no nodes - prevent this
+      }*/
+      if (from > targetDepth) {
+        $treeRangeSlider.noUiSlider.set([targetDepth, null]);
+        return;
       }
       DataStore.setHtmlTreeRange(from, to);
       onInputHtmlChanged();
