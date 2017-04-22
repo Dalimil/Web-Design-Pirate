@@ -1,8 +1,9 @@
 // global variables: 
 // html_beautify, css_beautify, cssParser
 
-
-const Log = (...args) => console.log.apply(console, args);
+// DEBUG Logs
+// const Log = (...args) => console.log.apply(console, args);
+const Log = (...args) => {};
 
 /**
  * Static utils that perform various operations on css and html strings
