@@ -3,6 +3,8 @@
 **Chrome DevTools Extension** :boat: :ghost: :anchor:  
 Fast and easy way to copy full HTML widgets, components, and parts of web design.
 
+**Chrome Web Store: https://chrome.google.com/webstore/detail/web-design-pirate/pdplijceapgnjafgenmlijejmjgplbhm**
+
 <a href="https://github.com/Dalimil/Web-Design-Pirate">
   <img alt="Web Design Pirate - Chrome extension" src="https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/icon450.png" width="300">
 </a>
@@ -34,5 +36,4 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 
 ### TODO
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume user interest in the wrapper element)
-- Add link to Chrome Store
 - Replace UnCSS online api with a custom offline script using jQuery selectors from parsed CSS AST
