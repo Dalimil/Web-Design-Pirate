@@ -34,6 +34,8 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 ## Dev
 **Pull requests welcome**
 
+Firefox version: APIs used are supported as of Firefox 54. However, Console's command-line helper functions, like $0 (last inspected element) are still not implemented - and sadly, getting access to the last HTML element selected by user is a required part of this extension's workflow.
+
 ### TODO
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume user interest in the wrapper element)
 - Replace UnCSS online api with a custom offline script using jQuery selectors from parsed CSS AST
