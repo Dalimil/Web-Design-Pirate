@@ -34,7 +34,7 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 ## Dev
 **Pull requests welcome**
 
-Firefox version: APIs used are supported as of Firefox 54. However, Console's command-line helper functions, like $0 (last inspected element) are still not implemented - and sadly, getting access to the last HTML element selected by user is a required part of this extension's workflow.
+Firefox version: APIs used are supported as of Firefox 54. In addition to that, this bug needs to be resolved first: https://bugzilla.mozilla.org/show_bug.cgi?id=1300590
 
 ### TODO
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume user interest in the wrapper element)
