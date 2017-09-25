@@ -4,6 +4,7 @@
   "version": "1.1",
   "description": "Fast and easy way to copy web components, HTML widgets and parts of website design.",
   "devtools_page": "src/devtools.html",
+
   "background": {
     "persistent": false,
     "scripts": ["src/background.js"]
@@ -11,6 +12,7 @@
   "permissions": [
     "<all_urls>"
   ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval';",
   "icons": {
     "128": "images/icon128.png",
     "48": "images/icon48.png"
