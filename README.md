@@ -34,7 +34,7 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 ## Dev
 **Pull requests welcome**
 
-Firefox version: APIs used are supported as of Firefox 54 and Bug-1300590 is fixed in Firefox 55.
+Firefox version: Waiting for Firefox 56: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/devtools.panels/ElementsPanel
 
 ### TODO
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume user interest in the wrapper element)
