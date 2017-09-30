@@ -1,9 +1,10 @@
 # Web Design Pirate [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=EQYTWEHP59DJ2)
 
-**Chrome DevTools Extension** :boat: :ghost: :anchor:  
+**Chrome and Firefox DevTools Extension** :boat: :ghost: :anchor:  
 Fast and easy way to copy full HTML widgets, components, and parts of web design.
 
-**Chrome Web Store: https://chrome.google.com/webstore/detail/web-design-pirate/pdplijceapgnjafgenmlijejmjgplbhm**
+**Chrome Web Store: https://chrome.google.com/webstore/detail/web-design-pirate/pdplijceapgnjafgenmlijejmjgplbhm**  
+**Firefox Add-on: https://addons.mozilla.org/en-US/firefox/addon/web-design-pirate-for-devtools/**
 
 <a href="https://github.com/Dalimil/Web-Design-Pirate">
   <img alt="Web Design Pirate - Chrome extension" src="https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/icon450.png" width="300">
@@ -33,8 +34,6 @@ For instance I like MDN's header navigation widget. I select it using Developer 
 
 ## Dev
 **Pull requests welcome**
-
-Firefox version: Waiting for Firefox 56: https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/devtools.panels/ElementsPanel
 
 ### TODO
 - For large chunks of HTML (e.g. Expedia html body) it is too slow (devtools freeze) - maybe remove deep level innerHTML already in content scripts (assume user interest in the wrapper element)
