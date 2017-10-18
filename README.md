@@ -4,7 +4,7 @@
 Fast and easy way to copy full HTML widgets, components, and parts of web design.
 
 **Chrome Web Store: https://chrome.google.com/webstore/detail/web-design-pirate/pdplijceapgnjafgenmlijejmjgplbhm**  
-**Firefox Add-on: https://addons.mozilla.org/en-US/firefox/addon/web-design-pirate-for-devtools/**
+**Firefox Add-on: [XPI package](firefox-xpi/)**
 
 <a href="https://github.com/Dalimil/Web-Design-Pirate">
   <img alt="Web Design Pirate - Chrome extension" src="https://github.com/Dalimil/Web-Design-Pirate/blob/master/images/icon450.png" width="300">
