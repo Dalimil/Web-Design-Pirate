@@ -8,10 +8,10 @@ const contentScripts = (() => {
    *  or only a href if the stylesheet is external
    */
   function getStyleSheets() {
-    return [].slice.call(document.styleSheets).map(({ cssRules: cr, href }) => (
+    return [].slice.call(document.styleSheets).map((x) => (
       {
-        href,
-        cssText: (cr && cr.length) ? [].slice.call(cr).map(r => r.cssText).join(" \n") : null,
+        href: x.href,
+        cssText: (x.hasOwnProperty('rules') && x.cssRules && x.cssRules.length) ? [].slice.call(x.cssRules).map(r => r.cssText).join(" \n") : null,
       }
     )).filter(v => v.href || v.cssText);
   }
