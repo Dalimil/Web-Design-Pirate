@@ -9,10 +9,14 @@ const contentScripts = (() => {
    */
   function getStyleSheets() {
     return [...document.styleSheets].map(styleSheet => {
-      const href = styleSheet.href;
-      const rules = styleSheet.rules || styleSheet.cssRules || null;
-      const cssText = Array.isArray(rules) ? rules.map(r => r.cssText).join(" \n") : null;
-      return { href, cssText };
+      try {
+        const href = styleSheet.href;
+        const rules = styleSheet.rules || styleSheet.cssRules || null;
+        const cssText = Array.isArray(rules) ? rules.map(r => r.cssText).join(" \n") : null;
+        return { href, cssText };
+      } catch (e) {
+        return {};
+      }
     })
     .filter(v => v.href || v.cssText);
   }

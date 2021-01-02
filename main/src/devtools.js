@@ -5,9 +5,8 @@
 // contentScripts.getLastInspectedElement
 // Log, Utils.*
 // jQuery, $
-const panelFilepath = "src/panel.html";
-const iconFilepath = "images/icon128.png";
-// TODO ^^ figure out how to keep paths relative for Firefox based on file and Chrome based on parent folder
+const panelFilepath = Utils.isFirefox() ? "panel.html" : "src/panel.html";
+const iconFilepath = Utils.isFirefox() ? "../images/icon128.png" : "images/icon128.png";
 
 // Create a new Devtools Panel
 chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel) => {
@@ -245,6 +244,9 @@ function PanelEnvironment(panelWindow) {
     DataStore.pullUncssResult().then(() => {
       updateResultPreview();
     }).catch(e => {
+      if (e.toString().includes('Cannot process empty CSS')) {
+        e = "Sadly, this webpage made its CSS stylesheets inaccessible.";
+      }
       $resultCssDisplay.textContent = "An error occurred. " + e;
     }).then(() => {
       lastProcessFinished = true;

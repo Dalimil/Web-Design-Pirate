@@ -9,6 +9,22 @@ const Log = (...args) => {};
  * Static utils that perform various operations on css and html strings
  */
 const Utils = {
+  isFirefox() {
+    return this.getBrowser() == "Firefox";
+  },
+
+  getBrowser() {
+    if (typeof chrome !== "undefined") {
+      if (typeof browser !== "undefined") {
+        return "Firefox";
+      } else {
+        return "Chrome";
+      }
+    } else {
+      return "Edge";
+    }
+  },
+
   combineCssPieces(cssPieces, minifyCss) {
     const hrString = Array(minifyCss ? 10 : 70).join("-");
     const cssString = cssPieces.map(({ source, cssText }) =>
