@@ -5,8 +5,9 @@
 // contentScripts.getLastInspectedElement
 // Log, Utils.*
 // jQuery, $
-const panelFilepath = "panel.html";
-const iconFilepath = "../images/icon128.png";
+const panelFilepath = "src/panel.html";
+const iconFilepath = "images/icon128.png";
+// TODO ^^ figure out how to keep paths relative for Firefox based on file and Chrome based on parent folder
 
 // Create a new Devtools Panel
 chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel) => {
