@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Web Design Pirate",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Fast and easy way to copy web components, HTML widgets and parts of website design.",
   "devtools_page": "src/devtools.html",
 
