@@ -132,20 +132,25 @@ function getCssForHtml(inputHtml, styleSheets) {
  * 	and document.querySelector() each of the CSS selectors to check if result is null
  */
 function _uncss(inputHtml, inputCss) {
-  const testServerUrl = "https://uncss-online.com/uncss";
-  const formData = new FormData();
-  formData.append("inputHtml", inputHtml);
-  formData.append("inputCss", inputCss);
-  formData.append("type", "fetch");
+  const testServerUrl = "https://uncss-online.com/api/uncss";
   return fetch(testServerUrl, {
     method: "POST",
-    body: formData
-  }).then(data => data.json())
-  .then(data => {
-    if (data.error) {
-      throw data.error;
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ inputHtml, inputCss})
+  })
+  .then(data => data.text())
+  .then(text => {
+    try {
+      const data = JSON.parse(text);
+      if (data.error) {
+        throw data.error;
+      }
+      return data.outputCss.replace(/\\r\\n/g, "\n");
+    } catch {
+      throw text;
     }
-    return data.outputCss.replace(/\\r\\n/g, "\n");
   });
 }
 

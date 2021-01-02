@@ -8,12 +8,13 @@ const contentScripts = (() => {
    *  or only a href if the stylesheet is external
    */
   function getStyleSheets() {
-    return [].slice.call(document.styleSheets).map(({ cssRules: cr, href }) => (
-      {
-        href,
-        cssText: (cr && cr.length) ? [].slice.call(cr).map(r => r.cssText).join(" \n") : null,
-      }
-    )).filter(v => v.href || v.cssText);
+    return [...document.styleSheets].map(styleSheet => {
+      const href = styleSheet.href;
+      const rules = styleSheet.rules || styleSheet.cssRules || null;
+      const cssText = Array.isArray(rules) ? rules.map(r => r.cssText).join(" \n") : null;
+      return { href, cssText };
+    })
+    .filter(v => v.href || v.cssText);
   }
 
   /**

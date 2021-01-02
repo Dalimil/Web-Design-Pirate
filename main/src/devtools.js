@@ -5,8 +5,8 @@
 // contentScripts.getLastInspectedElement
 // Log, Utils.*
 // jQuery, $
-const panelFilepath = "src/panel.html";
-const iconFilepath = "images/icon128.png";
+const panelFilepath = "panel.html";
+const iconFilepath = "../images/icon128.png";
 
 // Create a new Devtools Panel
 chrome.devtools.panels.create("Pirate", iconFilepath, panelFilepath, (thisPanel) => {
@@ -143,7 +143,7 @@ function PanelEnvironment(panelWindow) {
   const $openResultWindow = doc.querySelector("#new-window-result");
   const $loadingIndicatorLeft = doc.querySelector("#loading-indicator-left");
   const $loadingIndicatorRight = doc.querySelector("#loading-indicator-right");
-  
+
   initTabLayouts(panelWindow.jQuery);
 
   $scopeCssSwitch.addEventListener('change', () => {
